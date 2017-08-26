@@ -2,7 +2,7 @@ package stack
 
 import "testing"
 import "time"
-import "fmt"
+
 import "sync"
 
 func TestConcurrency(t *testing.T) {
@@ -14,13 +14,12 @@ func TestConcurrency(t *testing.T) {
 	for i := 0; i <= 10; i++ {
 		go func() {
 			if megaStack.IsEmpty() == false {
-				value, err := megaStack.Peek()
+				_, ok := megaStack.Peek()
 
-				if err != nil {
+				if ok == false {
 					//we ignore the stack was empty, because of the fast times this will happen, 1 stack vs lots of workers
-					//fmt.Printf(err.Error())
+					//TODO learn a better way to do this
 				}
-				fmt.Println(value)
 			}
 			time.Sleep(time.Millisecond * 3)
 		}()
@@ -31,10 +30,10 @@ func TestConcurrency(t *testing.T) {
 		group.Add(1)
 		go func() {
 			for times := 0; times < 200; times++ {
-				err := megaStack.Push(times)
+				ok := megaStack.Push(times)
 
-				if err != nil {
-					t.Error(err)
+				if ok == false {
+					t.Error("insert failed " + string(times))
 				}
 
 				time.Sleep(time.Millisecond * 10)
@@ -49,11 +48,11 @@ func TestConcurrency(t *testing.T) {
 		go func() {
 			for times := 0; times < 200; times++ {
 				if megaStack.IsEmpty() == false {
-					_, err := megaStack.Pop()
+					_, ok := megaStack.Pop()
 
-					if err != nil {
+					if ok == false {
 						//we ignore the stack was empty, because of the fast times this will happen, 1 stack vs lots of workers
-						//fmt.Printf(err.Error())
+						//TODO learn a better way to do this
 					}
 				}
 				time.Sleep(time.Millisecond * 8)
@@ -94,50 +93,50 @@ func one(t *testing.T, toPush []interface{}) {
 	s := New(false)
 
 	for i, v := range toPush {
-		err := s.Push(v)
+		ok := s.Push(v)
 
-		if err != nil {
-			t.Error(err)
+		if ok == false {
+			t.Error("push failed ")
 		}
 		len := s.Len()
 
 		if len != i+1 {
-			t.Errorf("Len expected %v, got %v, for %v", i, len, toPush)
+			t.Errorf("len failed, expected %v, got %v, for %v", i, len, toPush)
 		}
 
-		peek, err := s.Peek()
+		value, ok := s.Peek()
 
-		if err != nil {
-			t.Error(err)
+		if ok == false {
+			t.Error("peek failed")
 		}
 
-		if peek != v {
-			t.Errorf("Peek failed, expected %v, got %v ", v, peek)
+		if value != v {
+			t.Errorf("peek failed, expected %v, got %v ", v, value)
 		}
 	}
 
 	for i := len(toPush) - 1; i >= 0; i-- {
-		el, err := s.Pop()
+		el, ok := s.Pop()
 
-		if err != nil {
-			t.Error(err)
+		if ok == false {
+			t.Error("pop failed")
 		}
 
 		if el != toPush[i] {
-			t.Errorf("Pop failed, expected %v, got %v", toPush[i], el)
+			t.Errorf("pop failed, expected %v, got %v", toPush[i], el)
 		}
 	}
 
 	if s.IsEmpty() == false {
-		t.Errorf("Stack is not empty after all Pop, size=%v", s.Len())
+		t.Errorf("stack is not empty after all Pop(), size=%v", s.Len())
 	}
 }
 func TestInitPeekIsNil(t *testing.T) {
 	s := New(false)
-	peek, err := s.Peek()
+	peek, ok := s.Peek()
 
-	if err == nil {
-		t.Error("Peek should return an error when used on an empty stack")
+	if ok {
+		t.Error("peek should be false when used on an empty stack")
 	}
 
 	if peek != nil {
@@ -147,10 +146,10 @@ func TestInitPeekIsNil(t *testing.T) {
 
 func TestInitPopIsNil(t *testing.T) {
 	s := New(false)
-	var pop, err = s.Pop()
+	var pop, ok = s.Pop()
 
-	if err == nil {
-		t.Error("Pop should return an error when used on an empty stack")
+	if ok {
+		t.Error("Pop should be false when used on an empty stack")
 	}
 
 	if pop != nil {
@@ -162,6 +161,10 @@ func TestInitIsEmpty(t *testing.T) {
 	s := New(false)
 
 	if s.IsEmpty() == false {
-		t.Errorf("Stack is not empty after created")
+		t.Errorf("Stack is not empty after created (isEmpty)")
+	}
+
+	if s.HasElement() {
+		t.Errorf("Stack is not empty after created (hasElement)")
 	}
 }
