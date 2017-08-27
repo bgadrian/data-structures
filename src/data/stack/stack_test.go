@@ -4,8 +4,57 @@ import "testing"
 import "time"
 
 import "sync"
+import "fmt"
 
-func TestConcurrency(t *testing.T) {
+func TestConcurrencyManualLock(t *testing.T) {
+	megaStack := New(false)
+
+	var group sync.WaitGroup
+
+	//spam push
+	for i := 0; i <= 100; i++ {
+		group.Add(1)
+		go func() {
+			for times := 0; times < 200; times++ {
+				megaStack.Lock()
+				ok := megaStack.Push(times)
+
+				if ok == false {
+					t.Error("insert failed " + string(times))
+				}
+
+				megaStack.Unlock()
+
+				time.Sleep(time.Millisecond * 10)
+			}
+			group.Done()
+		}()
+	}
+
+	//spam pop and IsEmpty
+	for i := 0; i <= 100; i++ {
+		group.Add(1)
+		go func() {
+			for times := 0; times < 200; times++ {
+				megaStack.Lock()
+				if megaStack.HasElement() {
+					_, ok := megaStack.Pop()
+
+					if ok == false {
+						t.Error("lock failed, hasElement() but Pop() failed")
+					}
+				}
+				megaStack.Unlock()
+				time.Sleep(time.Millisecond * 8)
+			}
+			group.Done()
+		}()
+	}
+
+	group.Wait()
+}
+
+func TestConcurrencyAutoLock(t *testing.T) {
 
 	megaStack := New(true)
 	var group sync.WaitGroup
@@ -21,6 +70,10 @@ func TestConcurrency(t *testing.T) {
 					//TODO learn a better way to do this
 				}
 			}
+			//spam for test coverage
+			megaStack.String()
+			megaStack.Len()
+
 			time.Sleep(time.Millisecond * 3)
 		}()
 	}
@@ -47,7 +100,7 @@ func TestConcurrency(t *testing.T) {
 		group.Add(1)
 		go func() {
 			for times := 0; times < 200; times++ {
-				if megaStack.IsEmpty() == false {
+				if megaStack.HasElement() {
 					_, ok := megaStack.Pop()
 
 					if ok == false {
@@ -166,5 +219,37 @@ func TestInitIsEmpty(t *testing.T) {
 
 	if s.HasElement() {
 		t.Errorf("Stack is not empty after created (hasElement)")
+	}
+}
+
+func TestSkippingNewShouldPanic(t *testing.T) {
+	//TODO Should Stack implement lazyInit() method (like list.go has) so this should never happen?
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("the code did not panic")
+		}
+	}()
+	s := Stack{}
+
+	c := s.Len()
+
+	fmt.Print(c)
+}
+
+func TestStringer(t *testing.T) {
+	s := New(false)
+
+	v := s.String()
+	if v != "Stack [0]" {
+		t.Error("stringer was incorrect for 0 length" + v)
+	}
+
+	s.Push(1)
+	s.Push(1)
+	s.Push(1)
+
+	v = s.String()
+	if v != "Stack [3]" {
+		t.Error("stringer was incorrect for 3 length" + v)
 	}
 }

@@ -1,45 +1,56 @@
 /*Package stack contains a simple FIFO list implementation, no max size, generic use, store data in linked lists.
 
- Faster stack, but not safe for concurrency.
- var StackNotSafe := Stack.New(false)
+Scenario 1:
+Faster stack, but not safe for concurrency.
+var StackNotSafe := Stack.New(false)
 
+Scenario 2:
 If you use goroutines create one using
 var StackNotSafe := Stack.New(true)
-
 Most common error is "stack was emtpy", check Stack.Empty() or ignore it in highly-concurrent funcs.
+Because the state may change between the HasElement() call and Pop/Peek.
+
+Scenario 3:
+Manual lock the struct, 100% reability, prune to mistakes/bugs
+var Stack := Stack.New(false)
+Stack.Lock()
+//do stuff with Stack
+Stack.Unlock()
+
 */
 package stack
 
 import (
 	"container/list"
+	"strconv"
 	"sync"
 )
 
 //Stack a dynamic FIFO list, uses Linked lists for memory efficiency.
 type Stack struct {
-	data *list.List
-	safe bool
+	data     *list.List
+	autoLock bool
 	sync.Mutex
 }
 
 //New generates a new stack
-func New(concurrencySafe bool) *Stack {
+func New(autoMutexLock bool) *Stack {
 	n := &Stack{}
 	n.data = list.New()
-	n.safe = concurrencySafe
+	n.autoLock = autoMutexLock
 	return n
 }
 
 //Push (storing) an element on the stack.
-func (s *Stack) Push(element interface{}) bool {
-	if s.safe {
+func (s *Stack) Push(item interface{}) (ok bool) {
+	if s.autoLock {
 		s.Lock()
 		defer s.Unlock()
 	}
 
-	listElement := s.data.PushBack(element)
-
-	if listElement == nil {
+	element := s.data.PushBack(item)
+	if element == nil {
+		//don't know how this can happen, just being defensive
 		return false
 	}
 
@@ -47,8 +58,8 @@ func (s *Stack) Push(element interface{}) bool {
 }
 
 //Pop Removing (accessing) an element from the stack.
-func (s *Stack) Pop() (element interface{}, ok bool) {
-	if s.safe {
+func (s *Stack) Pop() (item interface{}, ok bool) {
+	if s.autoLock {
 		s.Lock()
 		defer s.Unlock()
 	}
@@ -58,6 +69,7 @@ func (s *Stack) Pop() (element interface{}, ok bool) {
 
 	first := s.data.Back()
 	if first == nil {
+		//don't know how this can happen, just being defensive
 		return nil, false
 	}
 	s.data.Remove(first)
@@ -66,8 +78,8 @@ func (s *Stack) Pop() (element interface{}, ok bool) {
 }
 
 //Peek get the top data element of the stack, without removing it.
-func (s *Stack) Peek() (interface{}, bool) {
-	if s.safe {
+func (s *Stack) Peek() (item interface{}, ok bool) {
+	if s.autoLock {
 		s.Lock()
 		defer s.Unlock()
 	}
@@ -81,7 +93,7 @@ func (s *Stack) Peek() (interface{}, bool) {
 
 //Len get the current length of the stack. The complexity is O(1).
 func (s *Stack) Len() int {
-	if s.safe {
+	if s.autoLock {
 		s.Lock()
 		defer s.Unlock()
 	}
@@ -90,7 +102,7 @@ func (s *Stack) Len() int {
 
 //IsEmpty Returns true if the stack is empty. Use this before Pop or Peek. Opposite of HasElement()
 func (s *Stack) IsEmpty() bool {
-	if s.safe {
+	if s.autoLock {
 		s.Lock()
 		defer s.Unlock()
 	}
@@ -99,7 +111,7 @@ func (s *Stack) IsEmpty() bool {
 
 //HasElement Returns true if the stack is NOT empty. Use this before Pop or Peek. Opposite of IsEmpty()
 func (s *Stack) HasElement() bool {
-	if s.safe {
+	if s.autoLock {
 		s.Lock()
 		defer s.Unlock()
 	}
@@ -107,9 +119,9 @@ func (s *Stack) HasElement() bool {
 }
 
 func (s *Stack) String() string {
-	if s.safe {
+	if s.autoLock {
 		s.Lock()
 		defer s.Unlock()
 	}
-	return "Stack len " + string(s.data.Len())
+	return "Stack [" + strconv.Itoa(s.data.Len()) + "]"
 }
