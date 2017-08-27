@@ -1,13 +1,12 @@
-package stack
+package lists
 
 import "testing"
 import "time"
-
 import "sync"
 import "fmt"
 
 func TestConcurrencyManualLock(t *testing.T) {
-	megaStack := New(false)
+	megaStack := NewStack(false)
 
 	var group sync.WaitGroup
 
@@ -56,7 +55,7 @@ func TestConcurrencyManualLock(t *testing.T) {
 
 func TestConcurrencyAutoLock(t *testing.T) {
 
-	megaStack := New(true)
+	megaStack := NewStack(true)
 	var group sync.WaitGroup
 
 	//spam peek
@@ -117,33 +116,14 @@ func TestConcurrencyAutoLock(t *testing.T) {
 	group.Wait()
 }
 
-func TestBasicTypes(t *testing.T) {
-	type Dummy struct {
-		a int
-	}
-
-	a, b, c := 1, 1, 1
-
-	table := [][]interface{}{
-		{1.0, 2.2, 3.14},
-		{-1000, 0, 1000},
-		{"str1", "str2"},
-		{true, false, true},
-		{Dummy{1}, Dummy{2}},
-		{1, true, "str"},
-		{nil},
-		{nil, nil},
-		{nil, nil, nil, nil, nil},
-		{&a, &b, &c},
-	}
-
-	for _, r := range table {
-		one(t, r)
+func TestStackBasicTypes(t *testing.T) {
+	for _, r := range fakeTable {
+		testStackFunctionality(t, r)
 	}
 }
 
-func one(t *testing.T, toPush []interface{}) {
-	s := New(false)
+func testStackFunctionality(t *testing.T, toPush []interface{}) {
+	s := NewStack(false)
 
 	for i, v := range toPush {
 		ok := s.Push(v)
@@ -180,12 +160,13 @@ func one(t *testing.T, toPush []interface{}) {
 		}
 	}
 
-	if s.IsEmpty() == false {
+	if s.HasElement() {
 		t.Errorf("stack is not empty after all Pop(), size=%v", s.Len())
 	}
 }
+
 func TestInitPeekIsNil(t *testing.T) {
-	s := New(false)
+	s := NewStack(false)
 	peek, ok := s.Peek()
 
 	if ok {
@@ -197,8 +178,8 @@ func TestInitPeekIsNil(t *testing.T) {
 	}
 }
 
-func TestInitPopIsNil(t *testing.T) {
-	s := New(false)
+func TestStackInitPopIsNil(t *testing.T) {
+	s := NewStack(false)
 	var pop, ok = s.Pop()
 
 	if ok {
@@ -210,19 +191,11 @@ func TestInitPopIsNil(t *testing.T) {
 	}
 }
 
-func TestInitIsEmpty(t *testing.T) {
-	s := New(false)
-
-	if s.IsEmpty() == false {
-		t.Errorf("Stack is not empty after created (isEmpty)")
-	}
-
-	if s.HasElement() {
-		t.Errorf("Stack is not empty after created (hasElement)")
-	}
+func TestStackInitIsEmpty(t *testing.T) {
+	helperInitIsEmpty("stack", NewStack(false), t)
 }
 
-func TestSkippingNewShouldPanic(t *testing.T) {
+func TestStackSkippingNewShouldPanic(t *testing.T) {
 	//TODO Should Stack implement lazyInit() method (like list.go has) so this should never happen?
 	defer func() {
 		if r := recover(); r == nil {
@@ -236,8 +209,8 @@ func TestSkippingNewShouldPanic(t *testing.T) {
 	fmt.Print(c)
 }
 
-func TestStringer(t *testing.T) {
-	s := New(false)
+func TestStackStringer(t *testing.T) {
+	s := NewStack(false)
 
 	v := s.String()
 	if v != "Stack [0]" {
