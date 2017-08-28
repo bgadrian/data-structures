@@ -26,6 +26,13 @@ func TestHQOne(t *testing.T) {
 	testHQdeq(l, "a", 0, t)
 	testHQenq(l, "a", t)
 }
+
+func TestHQOverflowPriority(t *testing.T) {
+	l := NewHierarchicalQueue(1, false)
+	if err := l.Enqueue("a", 2); err == nil {
+		t.Error("enq a priority > max didn't returned an error")
+	}
+}
 func TestHQTwo(t *testing.T) {
 	l := NewHierarchicalQueue(1, false)
 	testHQdeq(l, "a", 0, t)

@@ -3,6 +3,9 @@ language: go
 go:
   - master
 
+before_install:
+  - chmod +x go.test.sh
+
 script:
   - ./go.test.sh
 
