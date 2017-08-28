@@ -7,7 +7,7 @@ var listNotSafe := Stack.NewStack(false) //or queue
 Scenario 2:
 If you use goroutines create one using
 var listSafe := Stack.NewStack(true) //or queue
-Most common error is "stack was emtpy", check Stack.Empty() or ignore it in highly-concurrent funcs.
+Most common error is "stack was empty", check Stack.Empty() or ignore it in highly-concurrent funcs.
 Because the state may change between the HasElement() call and Pop/Peek.
 
 Scenario 3:
