@@ -15,9 +15,7 @@ Manual lock the struct, 100% reability, prune to mistakes/bugs
 var listNotSafe := Stack.NewStack(false) //or queue
 listNotSafe.Lock()
 //do stuff with the list
-listNotSafe.Unlock()
-
-*/
+listNotSafe.Unlock()*/
 package lists
 
 import (

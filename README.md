@@ -14,10 +14,9 @@ I will skip the data structures already implemented in the standard libraries (l
 
 **Hierarchical Queue** [description](https://www.researchgate.net/figure/261191274_fig1_Figure-1-Simple-queue-a-and-hierarchical-queue-b) An **O(1)/O(1) priority queue** implementation for small integers, that uses an assembly of N simple queues.
 
-It is optimized for large amount of data BUT with small value priorities ( < 1000 ). Can store any GO type.
+It is optimized for large amount of data BUT with small value priorities ( < 1000 ). Can store any  type of elements/values.
 
-Top priority = lowest value = 0
-Lowest priority = highest value = n
+**Priority: 0 (highest) - n (lowest)**
 
 For best performance:
 - use small priority values (0-100)

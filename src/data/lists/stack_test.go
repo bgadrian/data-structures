@@ -70,8 +70,14 @@ func TestConcurrencyAutoLock(t *testing.T) {
 				}
 			}
 			//spam for test coverage
-			megaStack.String()
-			megaStack.Len()
+			if megaStack.String() == "" {
+				t.Error("String() failed")
+			}
+
+			//spam for test coverage
+			if megaStack.Len() < 0 {
+				t.Error("Len() failed")
+			}
 
 			time.Sleep(time.Millisecond * 3)
 		}()

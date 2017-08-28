@@ -57,14 +57,14 @@ func TestQueueConcurrencyManualLock(t *testing.T) {
 
 func TestQueueConcurrencyAutoLock(t *testing.T) {
 
-	megaStack := NewQueue(true)
+	megaQueue := NewQueue(true)
 	var group sync.WaitGroup
 
 	//spam peek
 	for i := 0; i <= 10; i++ {
 		go func() {
-			if megaStack.IsEmpty() == false {
-				_, ok := megaStack.Peek()
+			if megaQueue.HasElement() {
+				_, ok := megaQueue.Peek()
 
 				if ok == false {
 					//we ignore the stack was empty, because of the fast times this will happen, 1 stack vs lots of workers
@@ -72,8 +72,14 @@ func TestQueueConcurrencyAutoLock(t *testing.T) {
 				}
 			}
 			//spam for test coverage
-			megaStack.String()
-			megaStack.Len()
+			if megaQueue.String() == "" {
+				t.Error("String() failed")
+			}
+
+			//spam for test coverage
+			if megaQueue.Len() < 0 {
+				t.Error("Len() failed")
+			}
 
 			time.Sleep(time.Millisecond * 3)
 		}()
@@ -84,7 +90,7 @@ func TestQueueConcurrencyAutoLock(t *testing.T) {
 		group.Add(1)
 		go func() {
 			for times := 0; times < 200; times++ {
-				ok := megaStack.Enqueue(times)
+				ok := megaQueue.Enqueue(times)
 
 				if ok == false {
 					t.Error("insert failed " + string(times))
@@ -101,8 +107,8 @@ func TestQueueConcurrencyAutoLock(t *testing.T) {
 		group.Add(1)
 		go func() {
 			for times := 0; times < 200; times++ {
-				if megaStack.HasElement() {
-					_, ok := megaStack.Dequeue()
+				if megaQueue.HasElement() {
+					_, ok := megaQueue.Dequeue()
 
 					if ok == false {
 						//we ignore the stack was empty, because of the fast times this will happen, 1 stack vs lots of workers
