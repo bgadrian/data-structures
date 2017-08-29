@@ -85,6 +85,15 @@ func (l *HierarchicalQueue) Dequeue() (interface{}, error) {
 		return nil, errors.New("depleted queue") //nothing to do
 	}
 
+	//this covers the case when you start to Deq before Enq
+	if l.q[l.highestP] == nil || l.q[l.highestP].Len() == 0 {
+		l.removeEmptyQ()
+
+		if l.highestP > l.lowestP {
+			return nil, errors.New("depleted queue") //nothing to do
+		}
+	}
+
 	element := l.q[l.highestP].Back()
 	l.q[l.highestP].Remove(element)
 

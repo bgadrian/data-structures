@@ -1,6 +1,7 @@
 package lists
 
 import (
+	"runtime"
 	"sync"
 	"testing"
 	"time"
@@ -60,16 +61,23 @@ func TestHQReverse(t *testing.T) {
 	testHQdeq(l, "b", t)
 }
 
-func TestHQDepletion(t *testing.T) {
+func TestHQDeqFirst(t *testing.T) {
 	l := NewHierarchicalQueue(1, false)
-	testHQenq(l, "a", 0, t)
-	testHQdeq(l, "a", t)
-	if l.IsDepleted() == false {
-		t.Error("is not depleted after empty")
-	}
 
 	if _, err := l.Dequeue(); err == nil {
-		t.Error("enq on a depleted HQ does not return error")
+		t.Error("enq on an empty HQ does not return error")
+	}
+
+	if l.IsDepleted() == false {
+		t.Error("deq an empty HQ should have depleted it")
+	}
+}
+func TestHQDeqDepleted(t *testing.T) {
+	l := NewHierarchicalQueue(1, false)
+	l.Dequeue()
+
+	if _, err := l.Dequeue(); err == nil {
+		t.Error("deq on a depleted HQ does not return error")
 	}
 }
 
@@ -146,6 +154,12 @@ func hqTestArrKeyIsPriority(arr []interface{}, t *testing.T) {
 }
 
 func TestHQConcurrencyManualLock(t *testing.T) {
+
+	runtime.GOMAXPROCS(1)
+	testHQLocks(true, t)
+	testHQLocks(false, t)
+
+	runtime.GOMAXPROCS(runtime.NumCPU())
 	testHQLocks(true, t)
 	testHQLocks(false, t)
 }
@@ -191,6 +205,9 @@ func testHQLocks(autoLock bool, t *testing.T) {
 	for i := 0; i <= 100; i++ {
 		group.Add(1)
 		go func() {
+			//we must wait for at least a few Enqeue, otherwise it will finish before it started
+			time.Sleep(time.Millisecond * 30)
+
 			var times uint8
 			for ; times < 200; times++ {
 				if autoLock == false {
