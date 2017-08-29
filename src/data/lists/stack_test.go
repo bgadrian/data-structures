@@ -232,3 +232,33 @@ func TestStackStringer(t *testing.T) {
 		t.Error("stringer was incorrect for 3 length" + v)
 	}
 }
+
+func BenchmarkStackSync1000(b *testing.B) {
+	benchStackSync(1000, b)
+}
+
+func BenchmarkStackSync100000(b *testing.B) {
+	benchStackSync(100000, b)
+}
+
+func BenchmarkStackSync1000000(b *testing.B) {
+	benchStackSync(1000000, b)
+}
+
+func benchStackSync(count int, b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		q := NewStack(false)
+
+		for c := 0; c < count; c++ {
+			if q.Push("a") == false {
+				b.Error("s push failed")
+			}
+		}
+
+		for c := 0; c < count; c++ {
+			if _, ok := q.Pop(); ok == false {
+				b.Error("s pop failed")
+			}
+		}
+	}
+}

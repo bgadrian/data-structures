@@ -1,6 +1,7 @@
 package lists
 
 import (
+	"math"
 	"runtime"
 	"sync"
 	"testing"
@@ -31,11 +32,11 @@ func TestHQOne(t *testing.T) {
 }
 
 func TestHQPriorityBounds(t *testing.T) {
-	l := NewHierarchicalQueue(3, false)
+	l := NewHierarchicalQueue(math.MaxUint8, false)
 	testHQenq(l, "a", 0, t)
 	testHQenq(l, "a", 1, t)
-	testHQenq(l, "a", 2, t)
-	testHQenq(l, "a", 3, t)
+	testHQenq(l, "a", math.MaxUint8-1, t)
+	testHQenq(l, "a", math.MaxUint8, t)
 }
 func TestHQOverflowPriority(t *testing.T) {
 	l := NewHierarchicalQueue(1, false)
@@ -78,6 +79,10 @@ func TestHQDeqDepleted(t *testing.T) {
 
 	if _, err := l.Dequeue(); err == nil {
 		t.Error("deq on a depleted HQ does not return error")
+	}
+
+	if err := l.Enqueue("a", 0); err == nil {
+		t.Error("enq on a depleted HQ does not return error")
 	}
 }
 
@@ -238,3 +243,128 @@ func testHQLocks(autoLock bool, t *testing.T) {
 
 	group.Wait()
 }
+
+/* ********************** priorities between 0 - 50 **********************************************/
+
+//BenchmarkHQSyncEnqDeqOn1000Size50P 1 Enqueue and 1 Dequeue cost in a HQ with 1.000 elements
+func BenchmarkHQSyncEnqDeqOn1000Size50P(b *testing.B) {
+	benchmarkHQSyncEnqDeqOne(1000, 50, b)
+}
+
+//BenchmarkHQSyncEnqDeqOn100000Size50P 1 Enqueue and 1 Dequeue cost in a HQ with 100.000 elements
+func BenchmarkHQSyncEnqDeqOn100000Size50P(b *testing.B) {
+	benchmarkHQSyncEnqDeqOne(100000, 50, b)
+}
+
+//BenchmarkHQSyncEnqDeqOn1000000Size50P 1 Enqueue and 1 Dequeue cost in a HQ with 1.000.000 elements
+func BenchmarkHQSyncEnqDeqOn1000000Size50P(b *testing.B) {
+	benchmarkHQSyncEnqDeqOne(1000000, 50, b)
+}
+
+//BenchmarkHQSyncEnqDeqOn10000000Size50P 1 Enqueue and 1 Dequeue cost in a HQ with 10.000.000 elements
+func BenchmarkHQSyncEnqDeqOn10000000Size50P(b *testing.B) {
+	benchmarkHQSyncEnqDeqOne(10000000, 50, b)
+}
+
+//BenchmarkHQSyncEnqDeqOn100000000Size50P 1 Enqueue and 1 Dequeue cost in a HQ with 1000.000.000 elements
+func BenchmarkHQSyncEnqDeqOn100000000Size50P(b *testing.B) {
+	benchmarkHQSyncEnqDeqOne(100000000, 50, b)
+}
+
+/* ********************** priorities between 0 - 255 **********************************************/
+
+//BenchmarkHQSyncEnqDeqOn1000Size255P 1 Enqueue and 1 Dequeue cost in a HQ with 1.000 elements
+func BenchmarkHQSyncEnqDeqOn1000Size255P(b *testing.B) {
+	benchmarkHQSyncEnqDeqOne(1000, 255, b)
+}
+
+//BenchmarkHQSyncEnqDeqOn100000Size255P 1 Enqueue and 1 Dequeue cost in a HQ with 100.000 elements
+func BenchmarkHQSyncEnqDeqOn100000Size255P(b *testing.B) {
+	benchmarkHQSyncEnqDeqOne(100000, 255, b)
+}
+
+//BenchmarkHQSyncEnqDeqOn1000000Size255P 1 Enqueue and 1 Dequeue cost in a HQ with 1.000.000 elements
+func BenchmarkHQSyncEnqDeqOn1000000Size255P(b *testing.B) {
+	benchmarkHQSyncEnqDeqOne(1000000, 255, b)
+}
+
+//BenchmarkHQSyncEnqDeqOn10000000Size255P 1 Enqueue and 1 Dequeue cost in a HQ with 10.000.000 elements
+func BenchmarkHQSyncEnqDeqOn10000000Size255P(b *testing.B) {
+	benchmarkHQSyncEnqDeqOne(10000000, 255, b)
+}
+
+//BenchmarkHQSyncEnqDeqOn100000000Size255P 1 Enqueue and 1 Dequeue cost in a HQ with 100.000.000 elements
+func BenchmarkHQSyncEnqDeqOn100000000Size255P(b *testing.B) {
+	benchmarkHQSyncEnqDeqOne(100000000, 255, b)
+}
+
+//benchmarkHQSyncEnqDeqOne Measure time for 1 Enqueue and 1 Dequeue
+func benchmarkHQSyncEnqDeqOne(count int, lowestP uint8, b *testing.B) {
+
+	l := NewHierarchicalQueue(lowestP, false)
+	var err error
+
+	for i := 0; i < count; i++ {
+		l.Enqueue("a", uint8(i)%lowestP)
+	}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		err = l.Enqueue("a", uint8(i)%lowestP)
+
+		if err != nil {
+			b.Error(err)
+		}
+
+		_, err = l.Dequeue()
+
+		if err != nil {
+			b.Error(err)
+		}
+	}
+}
+
+//BenchmarkHQSync1000E100P Time to build, fill and deplete a HQ with 1.000 elements
+// func BenchmarkHQSync1000E100P(b *testing.B) {
+// 	benchHQSyncOne(10, 100, b)
+// }
+
+// //BenchmarkHQSync100000E100P Time to build, fill and deplete a HQ with 100.000 elements
+// func BenchmarkHQSync100000E100P(b *testing.B) {
+// 	benchHQSyncOne(1000, 100, b)
+// }
+
+//BenchmarkHQSync1000000E100P Time to build, fill and deplete a HQ with 1.000.000 elements
+// func BenchmarkHQSync1000000E100P(b *testing.B) {
+// 	benchHQSyncOne(1000000, 100, b)
+// }
+
+//benchHQSyncOne run b.N tests of: HQ list with [elements] count of "a" valued nodes with priorities between 0-lowestP
+//the priorities are added 0-lowestP,0-lowestP...
+// func benchHQSyncOne(elements int, lowestP uint8, b *testing.B) {
+// 	b.ResetTimer()
+// 	for i := 0; i < b.N; i++ {
+
+// 		l := NewHierarchicalQueue(lowestP, false)
+// 		var err error
+// 		var p uint8
+
+// 		for times := 0; times < elements; times++ {
+// 			for p = 0; p <= lowestP; p++ {
+// 				err = l.Enqueue("a", p)
+
+// 				if err != nil {
+// 					b.Error(err)
+// 				}
+// 			}
+// 		}
+
+// 		for l.IsDepleted() == false {
+// 			_, err = l.Dequeue()
+
+// 			if err != nil {
+// 				b.Error(err)
+// 			}
+// 		}
+// 	}
+// }

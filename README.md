@@ -33,3 +33,31 @@ It is a map of [priority] = Queue (linked list). Queues are built with LinkedLis
 Inspired by papers:
 - *Revisiting Priority Queues for Image Analysis, Cris L. Luengo Hendriks*
 - *Hierarrchical Queues: general description and implementation in MAMBA Image library, Nicolas Beucher and Serge Beucher*
+
+#### Hierarchical Queue benchmarks
+This tests were done to demonstrate that Enqueue/Dequeue is O(1) regardless of the priority queue size. A queue is filled with N elements and equally distributed priorities. The data stored is 1 character.
+
+The benchmark is done for 2 operations (1 enqueue and 1 dequeue). K is the priority value (0 - K). 
+
+```bash
+go test -bench=.
+goos: windows
+goarch: amd64
+pkg: github.com/btools/basic-data-and-algorithms/src/data/lists
+```
+
+|K = 50 | | |
+|---|---|---|---|---|
+|N = 1000            |20000000               |66.7 ns/op|
+|N = 100000          |10000000               |223 ns/op|
+|N = 1000000         |10000000               |192 ns/op|
+|N = 10000000        |10000000               |199 ns/op|
+|N = 100000000       |10000000               |196 ns/op|
+
+|K = 255 | | |
+|---|---|---|---|---|
+|N = 1000            |10000000               |105 ns/op|
+|N = 100000          |10000000               |158 ns/op|
+|N = 1000000         |10000000               |182 ns/op|
+|N = 10000000        |10000000               |249 ns/op|
+|N = 100000000       |10000000               |308 ns/op|

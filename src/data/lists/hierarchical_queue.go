@@ -14,15 +14,17 @@ type HierarchicalQueue struct {
 	lowestP  uint8
 	highestP uint8
 	sync.Mutex
+	depleted bool
 }
 
 //NewHierarchicalQueue Generates a new HQ
 func NewHierarchicalQueue(lowestPriority uint8, autoMutexLock bool) *HierarchicalQueue {
 	return &HierarchicalQueue{
-		q:        make([]*list.List, lowestPriority+1),
+		q:        make([]*list.List, uint16(lowestPriority)+1),
 		lowestP:  lowestPriority,
 		highestP: 0, //advances to lowestP to empty all queues
 		autoLock: autoMutexLock,
+		depleted: false,
 	}
 }
 
@@ -31,6 +33,10 @@ func (l *HierarchicalQueue) Enqueue(value interface{}, priority uint8) (err erro
 	if l.autoLock {
 		l.Lock()
 		defer l.Unlock()
+	}
+
+	if l.depleted {
+		return errors.New("depleted queue") //nothing to do
 	}
 
 	if priority > l.lowestP {
@@ -65,11 +71,13 @@ func (l *HierarchicalQueue) removeEmptyQ() {
 
 		//remove the empty queue
 		l.q[l.highestP] = nil
-		l.highestP++
 
-		if l.highestP > l.lowestP {
+		if l.highestP == l.lowestP {
+			l.depleted = true
 			break
 		}
+
+		l.highestP++
 	}
 }
 
@@ -81,7 +89,7 @@ func (l *HierarchicalQueue) Dequeue() (interface{}, error) {
 		defer l.Unlock()
 	}
 
-	if l.highestP > l.lowestP {
+	if l.depleted {
 		return nil, errors.New("depleted queue") //nothing to do
 	}
 
@@ -89,7 +97,7 @@ func (l *HierarchicalQueue) Dequeue() (interface{}, error) {
 	if l.q[l.highestP] == nil || l.q[l.highestP].Len() == 0 {
 		l.removeEmptyQ()
 
-		if l.highestP > l.lowestP {
+		if l.depleted {
 			return nil, errors.New("depleted queue") //nothing to do
 		}
 	}
@@ -109,5 +117,5 @@ func (l *HierarchicalQueue) IsDepleted() bool {
 		l.Lock()
 		defer l.Unlock()
 	}
-	return l.highestP > l.lowestP
+	return l.depleted
 }

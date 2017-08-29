@@ -233,3 +233,33 @@ func TestQueueStringer(t *testing.T) {
 		t.Error("stringer was incorrect for 2 length" + v)
 	}
 }
+
+func BenchmarkQueueSync1000(b *testing.B) {
+	benchQueueSync(1000, b)
+}
+
+func BenchmarkQueueSync100000(b *testing.B) {
+	benchQueueSync(100000,b)
+}
+
+func BenchmarkQueueSync1000000(b *testing.B) {
+	benchQueueSync(1000000, b)
+}
+
+func benchQueueSync(count int, b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		q := NewQueue(false)
+
+		for c := 0; c < count; c++ {
+			if q.Enqueue("a") == false {
+				b.Error("q enq failed")
+			}
+		}
+
+		for c := 0; c < count; c++ {
+			if _, ok := q.Dequeue(); ok == false {
+				b.Error("q deq failed")
+			}
+		}
+	}
+}
