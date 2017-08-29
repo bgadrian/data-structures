@@ -37,7 +37,7 @@ Inspired by papers:
 #### Hierarchical Queue benchmarks
 This tests were done to demonstrate that Enqueue/Dequeue is O(1) regardless of the priority queue size. A queue is filled with N elements and equally distributed priorities. The data stored is 1 character.
 
-The benchmark is done for 2 operations (1 enqueue and 1 dequeue). K is the priority value (0 - K). 
+Each pass consists of : 1 enqueue with increasing priority (0,1,2,3...255,0,1...) and 1 dequeue. K is the priority lowest value (0 - K). 
 
 ```bash
 go test -bench=.
@@ -47,15 +47,16 @@ pkg: github.com/btools/basic-data-and-algorithms/src/data/lists
 ```
 
 |K = 50 | | |
-|---|---|---|---|---|
+|---|:---:|:---:|
 |N = 1000            |20000000               |66.7 ns/op|
 |N = 100000          |10000000               |223 ns/op|
 |N = 1000000         |10000000               |192 ns/op|
 |N = 10000000        |10000000               |199 ns/op|
 |N = 100000000       |10000000               |196 ns/op|
 
+
 |K = 255 | | |
-|---|---|---|---|---|
+|---|:---:|:---:|
 |N = 1000            |10000000               |105 ns/op|
 |N = 100000          |10000000               |158 ns/op|
 |N = 1000000         |10000000               |182 ns/op|
