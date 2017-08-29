@@ -28,6 +28,10 @@ func NewHierarchicalQueue(lowestPriority uint8, autoMutexLock bool) *Hierarchica
 
 //Enqueue Add a new element with a priority (0-highest priority, n-lowest)
 func (l *HierarchicalQueue) Enqueue(value interface{}, priority uint8) (err error) {
+	if l.autoLock {
+		l.Lock()
+		defer l.Unlock()
+	}
 
 	if priority > l.lowestP {
 		return errors.New("priority is bigger than max priority")
@@ -37,21 +41,16 @@ func (l *HierarchicalQueue) Enqueue(value interface{}, priority uint8) (err erro
 		l.q[priority] = list.New()
 	}
 
-	var element *list.Element
-
 	//special exception when we already began to take elements out and empty queues
 	//we add all the new elements in the current queue
 	//if their priority is smaller than the current one
 	//The HQ rule is "when a queue is empty and removed, it cannot be recreated"
 	if priority < l.highestP {
-		element = l.q[l.highestP].PushBack(value)
+		l.q[l.highestP].PushBack(value)
 	} else {
-		element = l.q[priority].PushFront(value)
+		l.q[priority].PushFront(value)
 	}
 
-	if element == nil {
-		return errors.New("cannot insert to list, internal error")
-	}
 	return nil
 }
 
@@ -77,8 +76,12 @@ func (l *HierarchicalQueue) removeEmptyQ() {
 //Dequeue Return the highest priority value (0-highest priority, n-lowest)
 //Recommended: start to Dequeue AFTER you Enqueue ALL the elements
 func (l *HierarchicalQueue) Dequeue() (interface{}, error) {
+	if l.autoLock {
+		l.Lock()
+		defer l.Unlock()
+	}
 
-	if l.IsDepleted() {
+	if l.highestP > l.lowestP {
 		return nil, errors.New("depleted queue") //nothing to do
 	}
 
@@ -93,5 +96,9 @@ func (l *HierarchicalQueue) Dequeue() (interface{}, error) {
 
 //IsDepleted If all the queues are empty and removed this instance cannot be used anymore
 func (l *HierarchicalQueue) IsDepleted() bool {
+	if l.autoLock {
+		l.Lock()
+		defer l.Unlock()
+	}
 	return l.highestP > l.lowestP
 }

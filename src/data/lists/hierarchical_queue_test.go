@@ -1,10 +1,12 @@
 package lists
 
 import (
+	"sync"
 	"testing"
+	"time"
 )
 
-func testHQenq(l *HierarchicalQueue, exp interface{}, t *testing.T) {
+func testHQdeq(l *HierarchicalQueue, exp interface{}, t *testing.T) {
 	val, err := l.Dequeue()
 
 	if err != nil {
@@ -14,7 +16,7 @@ func testHQenq(l *HierarchicalQueue, exp interface{}, t *testing.T) {
 	}
 }
 
-func testHQdeq(l *HierarchicalQueue, elem interface{}, p uint8, t *testing.T) {
+func testHQenq(l *HierarchicalQueue, elem interface{}, p uint8, t *testing.T) {
 	err := l.Enqueue(elem, p)
 	if err != nil {
 		t.Errorf("enq failed at elem [%v] priority [%v] with %v", elem, p, err)
@@ -23,10 +25,17 @@ func testHQdeq(l *HierarchicalQueue, elem interface{}, p uint8, t *testing.T) {
 
 func TestHQOne(t *testing.T) {
 	l := NewHierarchicalQueue(1, false)
-	testHQdeq(l, "a", 0, t)
-	testHQenq(l, "a", t)
+	testHQenq(l, "a", 0, t)
+	testHQdeq(l, "a", t)
 }
 
+func TestHQPriorityBounds(t *testing.T) {
+	l := NewHierarchicalQueue(3, false)
+	testHQenq(l, "a", 0, t)
+	testHQenq(l, "a", 1, t)
+	testHQenq(l, "a", 2, t)
+	testHQenq(l, "a", 3, t)
+}
 func TestHQOverflowPriority(t *testing.T) {
 	l := NewHierarchicalQueue(1, false)
 	if err := l.Enqueue("a", 2); err == nil {
@@ -35,26 +44,26 @@ func TestHQOverflowPriority(t *testing.T) {
 }
 func TestHQTwo(t *testing.T) {
 	l := NewHierarchicalQueue(1, false)
-	testHQdeq(l, "a", 0, t)
-	testHQdeq(l, "b", 0, t)
+	testHQenq(l, "a", 0, t)
+	testHQenq(l, "b", 0, t)
 
-	testHQenq(l, "a", t)
-	testHQenq(l, "b", t)
+	testHQdeq(l, "a", t)
+	testHQdeq(l, "b", t)
 }
 
 func TestHQReverse(t *testing.T) {
 	l := NewHierarchicalQueue(1, false)
-	testHQdeq(l, "b", 1, t)
-	testHQdeq(l, "a", 0, t)
+	testHQenq(l, "b", 1, t)
+	testHQenq(l, "a", 0, t)
 
-	testHQenq(l, "a", t)
-	testHQenq(l, "b", t)
+	testHQdeq(l, "a", t)
+	testHQdeq(l, "b", t)
 }
 
 func TestHQDepletion(t *testing.T) {
 	l := NewHierarchicalQueue(1, false)
-	testHQdeq(l, "a", 0, t)
-	testHQenq(l, "a", t)
+	testHQenq(l, "a", 0, t)
+	testHQdeq(l, "a", t)
 	if l.IsDepleted() == false {
 		t.Error("is not depleted after empty")
 	}
@@ -66,30 +75,30 @@ func TestHQDepletion(t *testing.T) {
 
 func TestHQEnqAfterDeqBigger(t *testing.T) {
 	l := NewHierarchicalQueue(2, false)
-	testHQdeq(l, "b", 1, t)
-	testHQdeq(l, "a", 0, t)
+	testHQenq(l, "b", 1, t)
+	testHQenq(l, "a", 0, t)
 
-	testHQenq(l, "a", t)
-	testHQdeq(l, "c", 2, t)
+	testHQdeq(l, "a", t)
+	testHQenq(l, "c", 2, t)
 
-	testHQenq(l, "b", t)
-	testHQenq(l, "c", t)
+	testHQdeq(l, "b", t)
+	testHQdeq(l, "c", t)
 }
 
 //TestHQEnqAfterDeqSmaller Edgecase, enq a smaller priority than the current one
 func TestHQEnqAfterDeqSmaller(t *testing.T) {
 	l := NewHierarchicalQueue(1, false)
-	testHQdeq(l, "c", 1, t)
-	testHQdeq(l, "a", 0, t)
+	testHQenq(l, "c", 1, t)
+	testHQenq(l, "a", 0, t)
 
-	testHQenq(l, "a", t) //should advance to 1 now
+	testHQdeq(l, "a", t) //should advance to 1 now
 	if l.highestP != 1 {
 		t.Errorf("highestP expected %v, got %v", 1, l.highestP)
 	}
-	testHQdeq(l, "b", 0, t) //add 0 < 1
+	testHQenq(l, "b", 0, t) //add 0 < 1
 
-	testHQenq(l, "b", t)
-	testHQenq(l, "c", t)
+	testHQdeq(l, "b", t)
+	testHQdeq(l, "c", t)
 }
 
 func TestHQOrderedMultipleTypes(t *testing.T) {
@@ -134,4 +143,81 @@ func hqTestArrKeyIsPriority(arr []interface{}, t *testing.T) {
 	if l.IsDepleted() == false {
 		t.Errorf("HQ is not depleted after deq all elem %v", arr)
 	}
+}
+
+func TestHQConcurrencyManualLock(t *testing.T) {
+	testHQLocks(true, t)
+	testHQLocks(false, t)
+}
+
+func testHQLocks(autoLock bool, t *testing.T) {
+	var lowestP uint8 = 50
+	megaHQ := NewHierarchicalQueue(lowestP, autoLock)
+
+	var group sync.WaitGroup
+
+	//spam enqueue
+	for i := 0; i <= 100; i++ {
+		group.Add(1)
+		go func() {
+			var times uint8
+			for ; times < 200; times++ {
+				if autoLock == false {
+					megaHQ.Lock()
+				}
+				if megaHQ.IsDepleted() {
+					if autoLock == false {
+						megaHQ.Unlock()
+					}
+					break
+				}
+
+				err := megaHQ.Enqueue("a", times%lowestP)
+
+				if err != nil {
+					t.Error(err)
+				}
+				if autoLock == false {
+
+					megaHQ.Unlock()
+				}
+				time.Sleep(time.Millisecond * 10)
+			}
+			group.Done()
+		}()
+	}
+
+	//spam dequeue
+	for i := 0; i <= 100; i++ {
+		group.Add(1)
+		go func() {
+			var times uint8
+			for ; times < 200; times++ {
+				if autoLock == false {
+					megaHQ.Lock()
+				}
+
+				if megaHQ.IsDepleted() {
+					if autoLock == false {
+						megaHQ.Unlock()
+					}
+					break
+				}
+				_, err := megaHQ.Dequeue()
+
+				if err != nil {
+					t.Error(err)
+				}
+
+				if autoLock == false {
+					megaHQ.Unlock()
+				}
+				time.Sleep(time.Millisecond * 10)
+			}
+
+			group.Done()
+		}()
+	}
+
+	group.Wait()
 }

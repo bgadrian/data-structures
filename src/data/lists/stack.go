@@ -26,11 +26,7 @@ func (s *Stack) Push(item interface{}) (ok bool) {
 		defer s.Unlock()
 	}
 
-	element := s.data.PushBack(item)
-	if element == nil {
-		//don't know how this can happen, just being defensive
-		return false
-	}
+	s.data.PushBack(item)
 
 	return true
 }
@@ -41,13 +37,10 @@ func (s *Stack) Pop() (item interface{}, ok bool) {
 		s.Lock()
 		defer s.Unlock()
 	}
-	if s.data.Len() == 0 {
-		return nil, false
-	}
 
 	first := s.data.Back()
 	if first == nil {
-		//don't know how this can happen, just being defensive
+		//the list is empty
 		return nil, false
 	}
 	s.data.Remove(first)
@@ -67,10 +60,6 @@ func (s *Stack) Peek() (item interface{}, ok bool) {
 	}
 
 	first := s.data.Back()
-	if first == nil {
-		//don't know how this can happen, just being defensive
-		return nil, false
-	}
 
 	return first.Value, true
 }
