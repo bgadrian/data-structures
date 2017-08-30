@@ -36,7 +36,7 @@ The downsides:
 
 (a) - normal queue, (b) - list of queues
 
-It is an array of buckets. The key is the priority and the bucket is a queue. Queues are [LinkedLists](https://github.com/karalabe/cookiejar/tree/master/collections/queue), the advantage is that no memory preallocation is needed and the queue/dequeue is O(1).
+It is an array of buckets. The key is the priority and the bucket is a queue. Queues are ~~linked lists~~ [dynamically growing circular slice of blocks](https://github.com/karalabe/cookiejar/tree/master/collections/queue), the advantage is that no memory preallocation is needed and the queue/dequeue is O(1).
 We dequeue from highest priority (0) until it's bucket (queue) is empty and we remove it. We move to the next priority (1) and so on until we deplete the structure.
 
 Inspired by papers:
@@ -44,7 +44,7 @@ Inspired by papers:
 - *Hierarrchical Queues: general description and implementation in MAMBA Image library, Nicolas Beucher and Serge Beucher*
 
 #### Hierarchical Queue benchmarks
-This syncronous tests were done to demonstrate that Enqueue/Dequeue is O(1) regardless of the priority queue size. A queue is filled with N elements and equally distributed priorities. The data stored is 1 character.
+This syncronous tests were done to demonstrate that Enqueue/Dequeue is O(1) regardless of the priority queue size. A queue is filled with N elements and equally distributed priorities. The data stored is 1 character. 
 
 Each pass consists of : 1 enqueue with increasing priority (0,1,2,3...255,0,1...) and 1 dequeue. K is the priority lowest value (0 - K). 
 
@@ -71,3 +71,5 @@ pkg: github.com/btools/basic-data-and-algorithms/src/data/lists
 |N = 1000000         |10000000               |24.6 ns/op|
 |N = 10000000        |10000000               |26.2 ns/op|
 |N = 100000000       |10000000               |29.0 ns/op|
+
+*Previous implementation used list.List linked lists, they were replaced with a queue 10x faster.*

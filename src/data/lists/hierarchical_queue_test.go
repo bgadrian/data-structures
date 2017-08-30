@@ -62,6 +62,47 @@ func TestHQReverse(t *testing.T) {
 	testHQdeq(l, "b", t)
 }
 
+func TestHQLenghts(t *testing.T) {
+	l := NewHierarchicalQueue(2, false)
+
+	quickAssert(0, l.Len(), "Len() after init", t)
+	quickAssert(0, l.LenPriority(0), "LenPriority() after init", t)
+	quickAssert(0, l.LenPriority(1), "LenPriority() after init", t)
+	quickAssert(0, l.LenPriority(2), "LenPriority() after init", t)
+
+	l.Enqueue("a", 0)
+
+	quickAssert(1, l.Len(), "Len() after 1enq", t)
+	quickAssert(1, l.LenPriority(0), "LenPriority(0) after 1enq", t)
+	quickAssert(0, l.LenPriority(1), "LenPriority(1) after 1enq", t)
+	quickAssert(0, l.LenPriority(2), "LenPriority(2) after 1enq", t)
+
+	l.Enqueue("a", 1)
+	l.Enqueue("a", 1)
+	l.Enqueue("a", 2)
+
+	quickAssert(4, l.Len(), "Len() after nenq", t)
+	quickAssert(1, l.LenPriority(0), "LenPriority(0) after nenq", t)
+	quickAssert(2, l.LenPriority(1), "LenPriority(1) after nenq", t)
+	quickAssert(1, l.LenPriority(2), "LenPriority(2) after nenq", t)
+
+	l.Dequeue()
+	l.Dequeue()
+
+	quickAssert(2, l.Len(), "Len() after deq", t)
+	quickAssert(0, l.LenPriority(0), "LenPriority(0) after deq", t)
+	quickAssert(1, l.LenPriority(1), "LenPriority(1) after deq", t)
+	quickAssert(1, l.LenPriority(2), "LenPriority(2) after deq", t)
+}
+
+func quickAssert(expected int, got int, fail string, t *testing.T) {
+	if expected == got {
+		return
+	}
+
+	t.Errorf("expected %v, got %v : %v", expected, got, fail)
+}
+
 func TestHQDeqFirst(t *testing.T) {
 	l := NewHierarchicalQueue(1, false)
 
@@ -235,6 +276,32 @@ func testHQLocks(autoLock bool, t *testing.T) {
 					megaHQ.Unlock()
 				}
 				time.Sleep(time.Millisecond * 10)
+			}
+
+			group.Done()
+		}()
+	}
+
+	//spam lengths
+	for i := 0; i <= 100; i++ {
+		group.Add(1)
+		go func() {
+			//we must wait for at least a few Enqeue, otherwise it will finish before it started
+			time.Sleep(time.Millisecond * 30)
+
+			var times uint8
+			for ; times < 50; times++ {
+				if autoLock == false {
+					megaHQ.Lock()
+				}
+
+				megaHQ.Len()
+				megaHQ.LenPriority(2)
+
+				if autoLock == false {
+					megaHQ.Unlock()
+				}
+				time.Sleep(time.Millisecond * 20)
 			}
 
 			group.Done()

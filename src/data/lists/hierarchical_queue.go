@@ -16,6 +16,7 @@ type HierarchicalQueue struct {
 	highestP uint8
 	sync.Mutex
 	depleted bool
+	count    int
 }
 
 //NewHierarchicalQueue Generates a new HQ
@@ -57,6 +58,8 @@ func (l *HierarchicalQueue) Enqueue(value interface{}, priority uint8) (err erro
 	} else {
 		l.q[priority].PushRight(value)
 	}
+
+	l.count++
 
 	return nil
 }
@@ -105,6 +108,7 @@ func (l *HierarchicalQueue) Dequeue() (interface{}, error) {
 
 	element := l.q[l.highestP].PopLeft()
 
+	l.count--
 	//make sure next time we have something to dequeue
 	l.removeEmptyQ()
 
@@ -118,4 +122,28 @@ func (l *HierarchicalQueue) IsDepleted() bool {
 		defer l.Unlock()
 	}
 	return l.depleted
+}
+
+//Len Return the count of all values from all priorities
+func (l *HierarchicalQueue) Len() int {
+	if l.autoLock {
+		l.Lock()
+		defer l.Unlock()
+	}
+
+	return l.count
+}
+
+//PriorityLen Returns the count of all values from a specific priority queue
+func (l *HierarchicalQueue) LenPriority(priority uint8) int {
+	if l.autoLock {
+		l.Lock()
+		defer l.Unlock()
+	}
+	
+	if l.q[priority] != nil {
+		return l.q[priority].Size()
+	}
+
+	return 0
 }
