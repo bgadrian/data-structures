@@ -11,24 +11,33 @@ I will skip the data structures already implemented in the standard libraries (l
 ### Stack [description](https://www.tutorialspoint.com/data_structures_algorithms/stack_algorithm.htm)
 Basic stack (FILO) using the builtin linked list, can store any type, concurrency safe, no size limit, implements Stringer.
 
-### Queue [description](https://www.tutorialspoint.com/data_structures_algorithms/dsa_queue.htm) - 
+### Queue [description](https://www.tutorialspoint.com/data_structures_algorithms/dsa_queue.htm) 
 Basic queue (FIFO) using the builtin linked list, can store any type, concurrency safe (optional mutex), no size limit, implements Stringer.
 
 ### Hierarchical Queue [description](https://www.researchgate.net/figure/261191274_fig1_Figure-1-Simple-queue-a-and-hierarchical-queue-b) 
 An **O(1)/O(1) priority queue** implementation for small integers, that uses an assembly of N simple queues.
 
-It is optimized for large amount of data BUT with small value priorities ( < 1000 ). Can store any  type of elements/values.
+It is optimized for large amount of data BUT with small value priorities ( <= 255 ). Can store any type of elements/values. 
 
 **Priority: 0 (highest) - n (lowest)**
 
-For best performance:
-- use small priority values (0-100)
-- *priorities should not have big holes (sparse, missing values)
-- Enqueue ALL the elements before starting to Dequeue
-- cannot be reused (when a queue is empty and removed, it cannot be recreated)
+For best performance **Enqueue ALL the elements before starting to Dequeue**.
+The downsides:
+- the instance cannot be reused (when a priority queue is empty and removed, it cannot be recreated)
+- priorities should not have big holes (sparse, missing values)
+#### Hierarchical Queue usages 
+* image/video processing
+* networking (routing)
+*  anywhere you have a small range of priorities/channels.
 
+#### Hierarchical Queue implementation:
 
-It is a map of [priority] = Queue (linked list). Queues are built with LinkedLists, I think slices could be faster, but when having millions of elements memory is more important
+![HQ example](https://www.researchgate.net/profile/Serge_Beucher/publication/261191274/figure/fig1/AS:296718022266884@1447754497479/Figure-1-Simple-queue-a-and-hierarchical-queue-b.png)
+
+(a) - normal queue, (b) - list of queues
+
+It is an array of buckets. The key is the priority and the bucket is a queue. Queues are LinkedLists, the advantage is that no memory preallocation is needed and the queue/dequeue is O(1).
+We dequeue from highest priority (0) until it's bucket (queue) is empty and we remove it. We move to the next priority (1) and so on until we deplete the structure.
 
 Inspired by papers:
 - *Revisiting Priority Queues for Image Analysis, Cris L. Luengo Hendriks*
