@@ -21,8 +21,7 @@ listNotSafe.Lock()
 //do stuff with the list
 listNotSafe.Unlock()
 
-For more details see the README and *_test.go
-*/
+For more details see the README and *_test.go*/
 package lists
 
 import (

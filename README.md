@@ -35,7 +35,7 @@ Inspired by papers:
 - *Hierarrchical Queues: general description and implementation in MAMBA Image library, Nicolas Beucher and Serge Beucher*
 
 #### Hierarchical Queue benchmarks
-This tests were done to demonstrate that Enqueue/Dequeue is O(1) regardless of the priority queue size. A queue is filled with N elements and equally distributed priorities. The data stored is 1 character.
+This syncronous tests were done to demonstrate that Enqueue/Dequeue is O(1) regardless of the priority queue size. A queue is filled with N elements and equally distributed priorities. The data stored is 1 character.
 
 Each pass consists of : 1 enqueue with increasing priority (0,1,2,3...255,0,1...) and 1 dequeue. K is the priority lowest value (0 - K). 
 
