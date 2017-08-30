@@ -6,7 +6,6 @@ import (
 )
 
 //Queue FIFO list, uses Linked lists
-//Please use lists.NewQueue()
 type Queue struct {
 	common
 }

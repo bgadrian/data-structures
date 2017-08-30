@@ -6,7 +6,6 @@ import (
 )
 
 //Stack FILO list, uses Linked lists
-//Please use lists.NewStack()
 type Stack struct {
 	common
 }

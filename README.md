@@ -36,7 +36,7 @@ The downsides:
 
 (a) - normal queue, (b) - list of queues
 
-It is an array of buckets. The key is the priority and the bucket is a queue. Queues are LinkedLists, the advantage is that no memory preallocation is needed and the queue/dequeue is O(1).
+It is an array of buckets. The key is the priority and the bucket is a queue. Queues are [LinkedLists](https://github.com/karalabe/cookiejar/tree/master/collections/queue), the advantage is that no memory preallocation is needed and the queue/dequeue is O(1).
 We dequeue from highest priority (0) until it's bucket (queue) is empty and we remove it. We move to the next priority (1) and so on until we deplete the structure.
 
 Inspired by papers:
@@ -57,17 +57,17 @@ pkg: github.com/btools/basic-data-and-algorithms/src/data/lists
 
 |K = 50 | | |
 |---|:---:|:---:|
-|N = 1000            |20000000               |66.7 ns/op|
-|N = 100000          |10000000               |223 ns/op|
-|N = 1000000         |10000000               |192 ns/op|
-|N = 10000000        |10000000               |199 ns/op|
-|N = 100000000       |10000000               |196 ns/op|
+|N = 1000            |20000000               |24.4 ns/op|
+|N = 100000          |10000000               |24.4 ns/op|
+|N = 1000000         |10000000               |24.4 ns/op|
+|N = 10000000        |10000000               |26.6 ns/op|
+|N = 100000000       |10000000               |33.4 ns/op|
 
 
 |K = 255 | | |
 |---|:---:|:---:|
-|N = 1000            |10000000               |105 ns/op|
-|N = 100000          |10000000               |158 ns/op|
-|N = 1000000         |10000000               |182 ns/op|
-|N = 10000000        |10000000               |249 ns/op|
-|N = 100000000       |10000000               |308 ns/op|
+|N = 1000            |10000000               |22.9 ns/op|
+|N = 100000          |10000000               |24.0 ns/op|
+|N = 1000000         |10000000               |24.6 ns/op|
+|N = 10000000        |10000000               |26.2 ns/op|
+|N = 100000000       |10000000               |29.0 ns/op|

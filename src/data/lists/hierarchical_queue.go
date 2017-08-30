@@ -1,16 +1,17 @@
 package lists
 
 import (
-	"container/list"
 	"errors"
 	"sync"
+
+	"github.com/karalabe/cookiejar/collections/deque"
 )
 
 //HierarchicalQueue An O(1)/O(1)* priority queue implementation for small integers
 //See the README for more info.
 type HierarchicalQueue struct {
 	autoLock bool
-	q        []*list.List
+	q        []*deque.Deque
 	lowestP  uint8
 	highestP uint8
 	sync.Mutex
@@ -20,7 +21,7 @@ type HierarchicalQueue struct {
 //NewHierarchicalQueue Generates a new HQ
 func NewHierarchicalQueue(lowestPriority uint8, autoMutexLock bool) *HierarchicalQueue {
 	return &HierarchicalQueue{
-		q:        make([]*list.List, uint16(lowestPriority)+1),
+		q:        make([]*deque.Deque, uint16(lowestPriority)+1),
 		lowestP:  lowestPriority,
 		highestP: 0, //advances to lowestP to empty all queues
 		autoLock: autoMutexLock,
@@ -44,7 +45,7 @@ func (l *HierarchicalQueue) Enqueue(value interface{}, priority uint8) (err erro
 	}
 
 	if l.q[priority] == nil {
-		l.q[priority] = list.New()
+		l.q[priority] = deque.New()
 	}
 
 	//special exception when we already began to take elements out and empty queues
@@ -52,9 +53,9 @@ func (l *HierarchicalQueue) Enqueue(value interface{}, priority uint8) (err erro
 	//if their priority is smaller than the current one
 	//The HQ rule is "when a queue is empty and removed, it cannot be recreated"
 	if priority < l.highestP {
-		l.q[l.highestP].PushBack(value)
+		l.q[l.highestP].PushLeft(value)
 	} else {
-		l.q[priority].PushFront(value)
+		l.q[priority].PushRight(value)
 	}
 
 	return nil
@@ -65,7 +66,7 @@ func (l *HierarchicalQueue) Enqueue(value interface{}, priority uint8) (err erro
 func (l *HierarchicalQueue) removeEmptyQ() {
 	for {
 		//we found a non empty queue, do NOT advance
-		if l.q[l.highestP] != nil && l.q[l.highestP].Len() > 0 {
+		if l.q[l.highestP] != nil && l.q[l.highestP].Size() > 0 {
 			break
 		}
 
@@ -94,7 +95,7 @@ func (l *HierarchicalQueue) Dequeue() (interface{}, error) {
 	}
 
 	//this covers the case when you start to Deq before Enq
-	if l.q[l.highestP] == nil || l.q[l.highestP].Len() == 0 {
+	if l.q[l.highestP] == nil || l.q[l.highestP].Size() == 0 {
 		l.removeEmptyQ()
 
 		if l.depleted {
@@ -102,13 +103,12 @@ func (l *HierarchicalQueue) Dequeue() (interface{}, error) {
 		}
 	}
 
-	element := l.q[l.highestP].Back()
-	l.q[l.highestP].Remove(element)
+	element := l.q[l.highestP].PopLeft()
 
 	//make sure next time we have something to dequeue
 	l.removeEmptyQ()
 
-	return element.Value, nil
+	return element, nil
 }
 
 //IsDepleted If all the queues are empty and removed this instance cannot be used anymore
