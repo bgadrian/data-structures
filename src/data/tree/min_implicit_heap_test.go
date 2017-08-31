@@ -1,26 +1,59 @@
 package tree
 
 import (
+	"reflect"
 	"testing"
 )
 
 func TestMinIHBasic(t *testing.T) {
 	h := MinImplicitHeap{}
 
-	h.AddNode(6)
+	h.Push(6)
 	v, ok := h.Pop()
 	if ok == false {
 		t.Error("cannot pop")
 	}
 	quickAssert(6, v, "basic pop 1", t)
+
+	v, ok = h.Pop()
+	quickAssertBool(false, ok, "pop empty was ok", t)
+}
+
+func TestMinIHAddOrder1(t *testing.T) {
+	h := MinImplicitHeap{}
+
+	h.Push(3)
+	h.Push(1)
+	h.Push(4)
+
+	if reflect.DeepEqual(h.a[:3], []int{1, 3, 4}) == false {
+		t.Error("push was not ok")
+	}
+
+	h.Push(2)
+
+	if reflect.DeepEqual(h.a[:4], []int{1, 2, 4, 3}) == false {
+		t.Error("push was not ok 2")
+	}
+
+	h.Push(0)
+
+	if reflect.DeepEqual(h.a[:5], []int{0, 1, 4, 3, 2}) == false {
+		t.Error("push was not ok 3")
+	}
+	h.Push(-1)
+
+	if reflect.DeepEqual(h.a[:6], []int{-1, 1, 0, 3, 2, 4}) == false {
+		t.Error("push was not ok 4")
+	}
 }
 
 func TestMinIHPopOrder1(t *testing.T) {
 	h := MinImplicitHeap{}
 
-	h.AddNode(1)
-	h.AddNode(3)
-	h.AddNode(5)
+	h.Push(5)
+	h.Push(3)
+	h.Push(1)
 
 	v, ok := h.Pop()
 	quickAssertBool(true, ok, "pop not ok 1", t)
@@ -33,13 +66,12 @@ func TestMinIHPopOrder1(t *testing.T) {
 	v, ok = h.Pop()
 	quickAssertBool(true, ok, "pop not ok 3", t)
 	quickAssert(5, v, "pop value 3", t)
-
 }
 
 func TestMinIHCapacity(t *testing.T) {
 	h := MinImplicitHeap{}
 
-	h.AddNode(101)
+	h.Push(101)
 	quickAssert(8, cap(h.a), "capacity is default", t)
 	quickAssert(h.a[0], 101, "root is set", t)
 
@@ -59,13 +91,25 @@ func TestMinIHCapacity(t *testing.T) {
 	// quickAssert(0, h.Levels(), "levels() after init", t)
 }
 
-func addIHNodes(h *MinImplicitHeap, c int) {
+func TestMinIHReset(t *testing.T) {
+	h := MinImplicitHeap{}
+
+	h.Push(1)
+	h.Push(2)
+
+	h.Reset()
+	quickAssert(0, h.a[0], "reset forgot about elements", t)
+	quickAssert(0, h.a[1], "reset forgot about elements", t)
+	quickAssert(0, h.n, "reset forgot about n", t)
+}
+
+func addIHNodes(h ImplicitHeap, c int) {
 	for i := 0; i < c; i++ {
-		h.AddNode(i)
+		h.Push(i)
 	}
 }
 
-func popIHNodes(h *MinImplicitHeap, c int, t *testing.T) {
+func popIHNodes(h ImplicitHeap, c int, t *testing.T) {
 	for i := 0; i < c; i++ {
 		_, ok := h.Pop()
 

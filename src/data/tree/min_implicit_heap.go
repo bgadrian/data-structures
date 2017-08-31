@@ -1,6 +1,13 @@
 package tree
 
-//MinImplicitHeap A list of numbers, stored as a Binary tree in a slice.
+//ImplicitHeap A dynamic list of numbers, stored as a Binary tree in a slice.
+type ImplicitHeap interface {
+	Push(v int)
+	Pop() (v int, ok bool)
+}
+
+//MinImplicitHeap A dynamic list of numbers, stored as a Binary tree in a slice.
+//Used to quickly get the smallest number from a list/queue/priority queue.
 type MinImplicitHeap struct {
 	a []int
 	n int //numbers in the heap
@@ -12,8 +19,8 @@ func (h *MinImplicitHeap) lazyInit() {
 	}
 }
 
-//AddNode Insert a new number in the list.
-func (h *MinImplicitHeap) AddNode(v int) {
+//Push Insert a new number in the list.
+func (h *MinImplicitHeap) Push(v int) {
 	h.lazyInit()
 
 	//if it is full, enlarge it
@@ -52,28 +59,38 @@ func (h *MinImplicitHeap) shouldGoUp(p, c int) bool {
 }
 
 func (h *MinImplicitHeap) shouldGoDownAt(pI, lcI, rcI int) int {
-	lcIsLeaf := lcI > h.n
-	rcIsLeaf := rcI > h.n
-	if lcIsLeaf && rcIsLeaf {
+	leftCExists := lcI < h.n
+	rightCExists := rcI < h.n
+
+	if leftCExists == false && rightCExists == false {
 		return -1 //the parent is a leaf
 	}
 
-	//only 1 child ?
-	if lcIsLeaf {
-		return rcI
-	} else if rcIsLeaf {
+	lcViable := leftCExists && h.shouldGoUp(h.a[pI], h.a[lcI])
+	rcViable := rightCExists && h.shouldGoUp(h.a[pI], h.a[rcI])
+
+	if lcViable == false && rcViable == false {
+		return -1
+	}
+
+	if lcViable && rcViable {
+		if h.a[lcI] > h.a[rcI] {
+			return rcI
+		}
 		return lcI
 	}
 
-	if h.a[lcI] > h.a[rcI] {
+	if lcViable {
 		return lcI
 	}
 
 	return rcI
 }
 
-//Pop Pop the root element (min/max).
+//Pop Pop the root element (min/max) O(log(n))
 func (h *MinImplicitHeap) Pop() (v int, ok bool) {
+	h.lazyInit()
+
 	if h.n <= 0 {
 		return 0, false
 	}
@@ -81,9 +98,15 @@ func (h *MinImplicitHeap) Pop() (v int, ok bool) {
 	//pop the root, exchange it with the last leaf
 	v = h.a[0]
 	ok = true
-	h.a[0] = h.a[h.n]
-	h.a[h.n] = 0
+
+	h.a[0] = 0
 	h.n--
+
+	if h.n == 0 {
+		return //no elements left, nothing to sort
+	}
+
+	h.a[0], h.a[h.n] = h.a[h.n], 0
 
 	//parentI - the poped root
 	for pI, switchToI, lcI, rcI := 0, 0, 0, 0; ; {
@@ -109,7 +132,8 @@ func (h *MinImplicitHeap) Pop() (v int, ok bool) {
 	return
 }
 
-//MaxImplicitHeap Used to quickly get the maximum value of a numeric list.
-type MaxImplicitHeap struct {
-	MinImplicitHeap
+//Reset Feed all your data to the Garbage Collector.
+func (h *MinImplicitHeap) Reset() {
+	h.a = make([]int, 8)
+	h.n = 0
 }

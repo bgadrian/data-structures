@@ -134,13 +134,13 @@ func (l *HierarchicalQueue) Len() int {
 	return l.count
 }
 
-//PriorityLen Returns the count of all values from a specific priority queue
+//LenPriority Returns the count of all values from a specific priority queue
 func (l *HierarchicalQueue) LenPriority(priority uint8) int {
 	if l.autoLock {
 		l.Lock()
 		defer l.Unlock()
 	}
-	
+
 	if l.q[priority] != nil {
 		return l.q[priority].Size()
 	}
