@@ -1,26 +1,43 @@
 package tree
 
-//ImplicitHeap A dynamic list of numbers, stored as a Binary tree in a slice.
+//ImplicitHeap A dynamic tree (list) of numbers, stored as a Binary tree in a slice.
 type ImplicitHeap interface {
 	Push(v int)
 	Pop() (v int, ok bool)
+	Peek() (v int, ok bool)
+	Reset()
 }
 
-//MinImplicitHeap A dynamic list of numbers, stored as a Binary tree in a slice.
+//ImplicitHeapMin A dynamic tree (list) of numbers, stored as a Binary tree in a slice.
 //Used to quickly get the smallest number from a list/queue/priority queue.
-type MinImplicitHeap struct {
-	a []int
-	n int //numbers in the heap
+type ImplicitHeapMin struct {
+	a       []int
+	n       int //numbers in the heap
+	compare ihCompare
 }
 
-func (h *MinImplicitHeap) lazyInit() {
+//shouldGoUp We keep the min comparasion formula in 1 place
+//it is overwritten for Max
+func minShouldGoUp(p, c int) bool {
+	return c < p
+}
+
+//inheritance bypass, the overloading didn't worked :(
+//TODO learn how to do a better composition (Parent calls a func from child)
+type ihCompare func(p, c int) bool
+
+func (h *ImplicitHeapMin) lazyInit() {
 	if h.a == nil {
 		h.a = make([]int, 8)
+	}
+
+	if h.compare == nil {
+		h.compare = minShouldGoUp
 	}
 }
 
 //Push Insert a new number in the list.
-func (h *MinImplicitHeap) Push(v int) {
+func (h *ImplicitHeapMin) Push(v int) {
 	h.lazyInit()
 
 	//if it is full, enlarge it
@@ -47,18 +64,14 @@ func (h *MinImplicitHeap) Push(v int) {
 	*/
 	cI := h.n - 1      //childIndex, newest number
 	pI := (cI - 1) / 2 //parentIndex
-	for h.shouldGoUp(h.a[pI], h.a[cI]) && pI >= 0 {
+	for h.compare(h.a[pI], h.a[cI]) && pI >= 0 {
 		h.a[pI], h.a[cI] = h.a[cI], h.a[pI]
 		cI = pI
 		pI = (cI - 1) / 2
 	}
 }
 
-func (h *MinImplicitHeap) shouldGoUp(p, c int) bool {
-	return c < p
-}
-
-func (h *MinImplicitHeap) shouldGoDownAt(pI, lcI, rcI int) int {
+func (h *ImplicitHeapMin) shouldGoDownAt(pI, lcI, rcI int) int {
 	leftCExists := lcI < h.n
 	rightCExists := rcI < h.n
 
@@ -66,8 +79,8 @@ func (h *MinImplicitHeap) shouldGoDownAt(pI, lcI, rcI int) int {
 		return -1 //the parent is a leaf
 	}
 
-	lcViable := leftCExists && h.shouldGoUp(h.a[pI], h.a[lcI])
-	rcViable := rightCExists && h.shouldGoUp(h.a[pI], h.a[rcI])
+	lcViable := leftCExists && h.compare(h.a[pI], h.a[lcI])
+	rcViable := rightCExists && h.compare(h.a[pI], h.a[rcI])
 
 	if lcViable == false && rcViable == false {
 		return -1
@@ -87,8 +100,21 @@ func (h *MinImplicitHeap) shouldGoDownAt(pI, lcI, rcI int) int {
 	return rcI
 }
 
-//Pop Pop the root element (min/max) O(log(n))
-func (h *MinImplicitHeap) Pop() (v int, ok bool) {
+//Peek Find-Min returns the minimum value (root element) O(1)
+//Does not mutate the list
+func (h *ImplicitHeapMin) Peek() (v int, ok bool) {
+	h.lazyInit()
+
+	if h.n <= 0 {
+		return 0, false
+	}
+
+	return h.a[0], true
+}
+
+//Pop Delete-Min, return the minimum value (root element) O(log(n))
+//Removes the element from the list
+func (h *ImplicitHeapMin) Pop() (v int, ok bool) {
 	h.lazyInit()
 
 	if h.n <= 0 {
@@ -133,7 +159,7 @@ func (h *MinImplicitHeap) Pop() (v int, ok bool) {
 }
 
 //Reset Feed all your data to the Garbage Collector.
-func (h *MinImplicitHeap) Reset() {
+func (h *ImplicitHeapMin) Reset() {
 	h.a = make([]int, 8)
 	h.n = 0
 }
