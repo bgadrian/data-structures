@@ -7,7 +7,7 @@ import (
 
 //most of the functionalities are common and tested in min_*test
 
-func TestMaxIHAddOrder1(t *testing.T) {
+func estMaxIHAddOrder1(t *testing.T) {
 	h := MaxImplicitHeap{}
 
 	h.Push(1)

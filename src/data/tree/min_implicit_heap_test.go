@@ -103,6 +103,22 @@ func TestMinIHReset(t *testing.T) {
 	quickAssert(0, h.n, "reset forgot about n", t)
 }
 
+func TestMinIHLarge(t *testing.T) {
+	type tuple struct {
+		h         MinImplicitHeap
+		toPush    []int
+		shouldPop []int
+	}
+
+	table := []tuple{
+		{MinImplicitHeap{}, []int{2, 1}, []int{1, 2}},
+	}
+
+	for i := 0; i < len(table); i++ {
+		spamIMCheck(table[i].h, table[i].toPush, table[i].shouldPop, t)
+	}
+}
+
 func addIHNodes(h ImplicitHeap, c int) {
 	for i := 0; i < c; i++ {
 		h.Push(i)
@@ -133,4 +149,16 @@ func quickAssertBool(expected bool, got bool, fail string, t *testing.T) {
 	}
 
 	t.Errorf("expected %v, got %v : %v", expected, got, fail)
+}
+
+func spamIMCheck(h MinImplicitHeap, toPush []int, shouldPop []int, t *testing.T) {
+	for i := 0; i < len(toPush); i++ {
+		h.Push(toPush[i])
+	}
+
+	for i := 0; i < len(shouldPop); i++ {
+		v, ok := h.Pop()
+		quickAssertBool(true, ok, "pop failed for ", t)
+		quickAssert(shouldPop[i], v, "pop failed for ", t)
+	}
 }

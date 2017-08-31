@@ -1,4 +1,4 @@
-package lists
+package priorityqueue
 
 import (
 	"errors"
