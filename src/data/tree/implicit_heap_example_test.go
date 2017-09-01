@@ -6,9 +6,9 @@ import (
 
 func todo() {
 	minPriority := ImplicitHeapMin{}
-	minPriority.Push(3)
-	minPriority.Push(1)
-	minPriority.Push(9)
+	minPriority.Push(3, "a")
+	minPriority.Push(1, "b")
+	minPriority.Push(9, "c")
 
 	min, ok := minPriority.Peek()
 	if ok == false {
@@ -16,6 +16,6 @@ func todo() {
 		return
 	}
 
-	fmt.Printf("min is %v", min) //min is 1
+	fmt.Printf("min is %v", min) //min is "b"
 
 }

@@ -1,53 +1,47 @@
 package tree
 
-//ImplicitHeap A dynamic tree (list) of numbers, stored as a Binary tree in a slice.
-type ImplicitHeap interface {
-	Push(v int)
-	Pop() (v int, ok bool)
-	Peek() (v int, ok bool)
-	Reset()
-}
+import "sync"
 
 //ImplicitHeapMin A dynamic tree (list) of numbers, stored as a Binary tree in a slice.
 //Used to quickly get the smallest number from a list/queue/priority queue.
 type ImplicitHeapMin struct {
-	a       []int
-	n       int //numbers in the heap
-	compare ihCompare
+	a             []implicitHeapNode
+	n             int //numbers in the heap
+	compare       ihCompare
+	autoLockMutex bool
+	sync.Mutex
 }
 
 //shouldGoUp We keep the min comparasion formula in 1 place
 //it is overwritten for Max
-func minShouldGoUp(p, c int) bool {
-	return c < p
+func minShouldGoUp(p, c implicitHeapNode) bool {
+	return c.priority < p.priority
 }
 
-//inheritance bypass, the overloading didn't worked :(
-//TODO learn how to do a better composition (Parent calls a func from child)
-type ihCompare func(p, c int) bool
-
-func (h *ImplicitHeapMin) lazyInit() {
-	if h.a == nil {
-		h.a = make([]int, 8)
-	}
-
-	if h.compare == nil {
-		h.compare = minShouldGoUp
-	}
+//NewImplicitHeapMin Constructor for IH Min
+func NewImplicitHeapMin(autoLockMutex bool) *ImplicitHeapMin {
+	h := &ImplicitHeapMin{
+		compare:       minShouldGoUp,
+		autoLockMutex: autoLockMutex}
+	h.Reset()
+	return h
 }
 
 //Push Push a new number in the list.
-func (h *ImplicitHeapMin) Push(v int) {
-	h.lazyInit()
+func (h *ImplicitHeapMin) Push(priority int, value interface{}) {
+	if h.autoLockMutex {
+		h.Lock()
+		defer h.Unlock()
+	}
 
 	//if it is full, enlarge it
 	if cap(h.a) == h.n {
-		newSlice := make([]int, cap(h.a)*2)
+		newSlice := make([]implicitHeapNode, cap(h.a)*2)
 		copy(newSlice, h.a)
 		h.a = newSlice
 	}
 
-	h.a[h.n] = v
+	h.a[h.n] = implicitHeapNode{priority, value}
 	h.n++
 
 	if h.n <= 1 {
@@ -77,33 +71,42 @@ func (h *ImplicitHeapMin) Push(v int) {
 
 //Peek Find-Min returns the minimum value (root element) O(1)
 //Does not mutate the list
-func (h *ImplicitHeapMin) Peek() (v int, ok bool) {
-	h.lazyInit()
+func (h *ImplicitHeapMin) Peek() (v interface{}, ok bool) {
+	if h.autoLockMutex {
+		h.Lock()
+		defer h.Unlock()
+	}
 
 	if h.n <= 0 {
 		return 0, false
 	}
 
-	return h.a[0], true
+	return h.a[0].value, true
 }
 
 //Pop Delete-Min, return the minimum value (root element) O(log(n))
 //Removes the element from the list
-func (h *ImplicitHeapMin) Pop() (v int, ok bool) {
-	h.lazyInit()
+func (h *ImplicitHeapMin) Pop() (v interface{}, ok bool) {
+	if h.autoLockMutex {
+		h.Lock()
+		defer h.Unlock()
+	}
 
 	if h.n <= 0 {
 		return 0, false
 	}
 
 	//pop the root, exchange it with the last leaf
-	v = h.a[0]
+	v = h.a[0].value
 	ok = true
 
-	h.a[0] = 0
 	h.n--
 
-	h.a[0], h.a[h.n] = h.a[h.n], 0
+	h.a[0] = h.a[h.n]
+
+	//mark it as delete, for testing purposes
+	h.a[h.n].priority = 0
+	h.a[h.n].value = nil
 
 	if h.n <= 1 {
 		return //no use to sort
@@ -143,7 +146,7 @@ func (h *ImplicitHeapMin) Pop() (v int, ok bool) {
 
 	//if it is mostly empty (less than 1/4), shrink it
 	if cap(h.a) > 8 && h.n <= cap(h.a)/4 {
-		newSlice := make([]int, cap(h.a)/2)
+		newSlice := make([]implicitHeapNode, cap(h.a)/2)
 		copy(newSlice, h.a)
 		h.a = newSlice
 	}
@@ -153,6 +156,31 @@ func (h *ImplicitHeapMin) Pop() (v int, ok bool) {
 
 //Reset Feed all your data to the Garbage Collector.
 func (h *ImplicitHeapMin) Reset() {
-	h.a = make([]int, 8)
+	if h.autoLockMutex {
+		h.Lock()
+		defer h.Unlock()
+	}
+
+	h.a = make([]implicitHeapNode, 8)
 	h.n = 0
+}
+
+//IsDepleted Check if the Heap is empty
+func (h *ImplicitHeapMin) IsDepleted() bool {
+	if h.autoLockMutex {
+		h.Lock()
+		defer h.Unlock()
+	}
+
+	return h.n == 0
+}
+
+//HasElement Check if at least 1 element is in the Heap
+func (h *ImplicitHeapMin) HasElement() bool {
+	if h.autoLockMutex {
+		h.Lock()
+		defer h.Unlock()
+	}
+
+	return h.n > 0
 }

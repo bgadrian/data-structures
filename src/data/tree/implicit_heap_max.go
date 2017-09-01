@@ -6,25 +6,15 @@ type ImplicitHeapMax struct {
 	ImplicitHeapMin
 }
 
-func maxShouldGoUp(p, c int) bool {
-	return c > p
+func maxShouldGoUp(p, c implicitHeapNode) bool {
+	return c.priority > p.priority
 }
 
-//Push Push a new number in the list.
-func (h *ImplicitHeapMax) Push(v int) {
-	if h.compare == nil {
-		h.compare = maxShouldGoUp
-	}
-
-	h.ImplicitHeapMin.Push(v)
-}
-
-//Pop Delete-Max, return the maximum value (root element) O(log(n))
-//Removes the element from the list
-func (h *ImplicitHeapMax) Pop() (v int, ok bool) {
-	if h.compare == nil {
-		h.compare = maxShouldGoUp
-	}
-
-	return h.ImplicitHeapMin.Pop()
+//NewImplicitHeapMax Constructor for IH Max
+func NewImplicitHeapMax(autoLockMutex bool) *ImplicitHeapMax {
+	h := &ImplicitHeapMax{}
+	h.compare = maxShouldGoUp
+	h.autoLockMutex = autoLockMutex
+	h.Reset()
+	return h
 }
