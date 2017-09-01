@@ -36,7 +36,7 @@ func (h *ImplicitHeapMin) lazyInit() {
 	}
 }
 
-//Push Insert a new number in the list.
+//Push Push a new number in the list.
 func (h *ImplicitHeapMin) Push(v int) {
 	h.lazyInit()
 
@@ -49,6 +49,10 @@ func (h *ImplicitHeapMin) Push(v int) {
 
 	h.a[h.n] = v
 	h.n++
+
+	if h.n <= 1 {
+		return //nothing to sort
+	}
 
 	//rebalance the tree, check the new value parents
 	/*
@@ -64,40 +68,11 @@ func (h *ImplicitHeapMin) Push(v int) {
 	*/
 	cI := h.n - 1      //childIndex, newest number
 	pI := (cI - 1) / 2 //parentIndex
-	for h.compare(h.a[pI], h.a[cI]) && pI >= 0 {
+	for cI > 0 && h.compare(h.a[pI], h.a[cI]) {
 		h.a[pI], h.a[cI] = h.a[cI], h.a[pI]
 		cI = pI
 		pI = (cI - 1) / 2
 	}
-}
-
-func (h *ImplicitHeapMin) shouldGoDownAt(pI, lcI, rcI int) int {
-	leftCExists := lcI < h.n
-	rightCExists := rcI < h.n
-
-	if leftCExists == false && rightCExists == false {
-		return -1 //the parent is a leaf
-	}
-
-	lcViable := leftCExists && h.compare(h.a[pI], h.a[lcI])
-	rcViable := rightCExists && h.compare(h.a[pI], h.a[rcI])
-
-	if lcViable == false && rcViable == false {
-		return -1
-	}
-
-	if lcViable && rcViable {
-		if h.a[lcI] > h.a[rcI] {
-			return rcI
-		}
-		return lcI
-	}
-
-	if lcViable {
-		return lcI
-	}
-
-	return rcI
 }
 
 //Peek Find-Min returns the minimum value (root element) O(1)
@@ -128,24 +103,42 @@ func (h *ImplicitHeapMin) Pop() (v int, ok bool) {
 	h.a[0] = 0
 	h.n--
 
-	if h.n == 0 {
-		return //no elements left, nothing to sort
-	}
-
 	h.a[0], h.a[h.n] = h.a[h.n], 0
 
-	//parentI - the poped root
-	for pI, switchToI, lcI, rcI := 0, 0, 0, 0; ; {
-		lcI = 2*pI + 1 //left child index
-		rcI = lcI + 1
-		switchToI = h.shouldGoDownAt(pI, lcI, rcI)
+	if h.n <= 1 {
+		return //no use to sort
+	}
 
-		if switchToI < 0 {
+	pI, isLc, isRc, leftChildIndex, rightChildIndex := 0, false, false, 0, 0
+
+	for {
+		leftChildIndex = 2*pI + 1
+		rightChildIndex = leftChildIndex + 1
+
+		//should the parent switch to left chid?
+		isLc = leftChildIndex < h.n && h.compare(h.a[pI], h.a[leftChildIndex])
+		isRc = rightChildIndex < h.n && h.compare(h.a[pI], h.a[rightChildIndex])
+
+		if isLc == false && isRc == false {
 			break
 		}
-		h.a[pI], h.a[switchToI] = h.a[switchToI], h.a[pI]
 
-		pI = switchToI
+		if isLc && isRc {
+			if h.compare(h.a[leftChildIndex], h.a[rightChildIndex]) {
+				isLc = false
+			}
+			isRc = false
+		}
+
+		if isLc {
+			h.a[pI], h.a[leftChildIndex] = h.a[leftChildIndex], h.a[pI]
+			pI = leftChildIndex
+			continue
+		}
+
+		//isRC
+		h.a[pI], h.a[rightChildIndex] = h.a[rightChildIndex], h.a[pI]
+		pI = rightChildIndex
 	}
 
 	//if it is mostly empty (less than 1/4), shrink it

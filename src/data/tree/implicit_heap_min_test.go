@@ -5,7 +5,13 @@ import (
 	"testing"
 )
 
-func TestMinIHBasic(t *testing.T) {
+type testIHTuple struct {
+	h         ImplicitHeap
+	toPush    []int
+	shouldPop []int
+}
+
+func TestIHMinBasic(t *testing.T) {
 	h := ImplicitHeapMin{}
 
 	h.Push(6)
@@ -29,7 +35,7 @@ func TestMinIHBasic(t *testing.T) {
 	quickAssertBool(false, ok, "peek empty was ok", t)
 }
 
-func TestMinIHAddOrder1(t *testing.T) {
+func TestIHMinAddOrder1(t *testing.T) {
 	h := ImplicitHeapMin{}
 
 	h.Push(3)
@@ -58,7 +64,26 @@ func TestMinIHAddOrder1(t *testing.T) {
 	}
 }
 
-func TestMinIHPopOrder1(t *testing.T) {
+func TestIHMinDuplicates(t *testing.T) {
+
+	table := []testIHTuple{
+		{&ImplicitHeapMin{},
+			[]int{3, 1, 1},
+			[]int{1, 1, 3}},
+		{&ImplicitHeapMin{},
+			[]int{3, 3, 1},
+			[]int{1, 3, 3}},
+		{&ImplicitHeapMin{},
+			[]int{5, 1, 4, 3, 4, 1, 1},
+			[]int{1, 1, 1, 3, 4, 4, 5}},
+	}
+
+	for i := 0; i < len(table); i++ {
+		testIMPopOrder(table[i].h, table[i].toPush, table[i].shouldPop, t)
+	}
+}
+
+func TestIHMinPopOrder1(t *testing.T) {
 	h := ImplicitHeapMin{}
 
 	h.Push(5)
@@ -78,7 +103,7 @@ func TestMinIHPopOrder1(t *testing.T) {
 	quickAssert(5, v, "pop value 3", t)
 }
 
-func TestMinIHCapacity(t *testing.T) {
+func TestIHMinCapacity(t *testing.T) {
 	h := ImplicitHeapMin{}
 
 	h.Push(101)
@@ -101,7 +126,7 @@ func TestMinIHCapacity(t *testing.T) {
 	// quickAssert(0, h.Levels(), "levels() after init", t)
 }
 
-func TestMinIHReset(t *testing.T) {
+func TestIHMinReset(t *testing.T) {
 	h := ImplicitHeapMin{}
 
 	h.Push(1)
@@ -113,29 +138,24 @@ func TestMinIHReset(t *testing.T) {
 	quickAssert(0, h.n, "reset forgot about n", t)
 }
 
-func TestMinIHLarge(t *testing.T) {
-	type tuple struct {
-		h         ImplicitHeapMin
-		toPush    []int
-		shouldPop []int
-	}
+func TestIHMinLarge(t *testing.T) {
 
 	a35 := []int{1, 2, 2, 2, 2, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 11, 12, 13, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 34, 34, 35, 35}
 
-	table := []tuple{
-		{ImplicitHeapMin{},
+	table := []testIHTuple{
+		{&ImplicitHeapMin{},
 			[]int{2, 3, 13, 7, 10, 11, 20, 4, 2, 14, 12, 2, 22, 10, 18, 34, 5, 24, 34, 25, 2, 35, 32, 35, 34, 23, 26, 28, 13, 16, 9, 8, 33, 27, 2, 6, 1, 29, 10, 21, 19, 15, 30, 31, 17},
 			a35},
-		{ImplicitHeapMin{},
+		{&ImplicitHeapMin{},
 			[]int{1, 33, 4, 24, 12, 13, 18, 3, 35, 32, 27, 10, 13, 2, 2, 35, 34, 2, 17, 9, 10, 20, 29, 2, 8, 30, 21, 22, 26, 28, 25, 34, 7, 5, 23, 19, 15, 16, 2, 14, 34, 10, 6, 11, 31},
 			a35},
-		{ImplicitHeapMin{},
+		{&ImplicitHeapMin{},
 			[]int{5, 34, 35, 10, 23, 24, 6, 15, 32, 29, 12, 31, 18, 2, 27, 13, 34, 25, 2, 10, 1, 2, 20, 22, 16, 9, 13, 30, 7, 10, 11, 33, 28, 4, 3, 2, 17, 2, 19, 14, 21, 34, 35, 8, 26},
 			a35},
 	}
 
 	for i := 0; i < len(table); i++ {
-		spamIMCheck(&table[i].h, table[i].toPush, table[i].shouldPop, t)
+		testIMPopOrder(table[i].h, table[i].toPush, table[i].shouldPop, t)
 	}
 }
 
@@ -171,19 +191,19 @@ func quickAssertBool(expected bool, got bool, fail string, t *testing.T) {
 	t.Errorf("expected %v, got %v : %v", expected, got, fail)
 }
 
-func spamIMCheck(h ImplicitHeap, toPush []int, shouldPop []int, t *testing.T) {
-	for i := 0; i < len(toPush); i++ {
-		h.Push(toPush[i])
+func testIMPopOrder(h ImplicitHeap, toPush []int, shouldPop []int, t *testing.T) {
+	for _, to := range toPush {
+		h.Push(to)
 	}
 
-	for i := 0; i < len(shouldPop); i++ {
+	for _, should := range shouldPop {
 		v, ok := h.Pop()
 		if ok == false {
 			t.Errorf("pop failed for %v", toPush)
 			break
 		}
-		if shouldPop[i] != v {
-			t.Errorf("expected %v, got %v , from %v", shouldPop[i], v, toPush)
+		if should != v {
+			t.Errorf("expected %v, got %v , from %v", should, v, toPush)
 			break
 		}
 	}

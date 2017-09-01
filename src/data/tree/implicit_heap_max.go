@@ -10,7 +10,7 @@ func maxShouldGoUp(p, c int) bool {
 	return c > p
 }
 
-//Push Insert a new number in the list.
+//Push Push a new number in the list.
 func (h *ImplicitHeapMax) Push(v int) {
 	if h.compare == nil {
 		h.compare = maxShouldGoUp
