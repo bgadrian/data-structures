@@ -1,0 +1,15 @@
+goos: windows
+goarch: amd64
+pkg: github.com/btools/basic-data-and-algorithms/priorityqueue
+BenchmarkHQSyncEnqDeqOn1000Size50P-4         	50000000	        24.6 ns/op	       0 B/op	       0 allocs/op
+BenchmarkHQSyncEnqDeqOn100000Size50P-4       	50000000	        25.9 ns/op	       0 B/op	       0 allocs/op
+BenchmarkHQSyncEnqDeqOn1000000Size50P-4      	50000000	        25.8 ns/op	       1 B/op	       0 allocs/op
+BenchmarkHQSyncEnqDeqOn10000000Size50P-4     	50000000	        27.9 ns/op	       5 B/op	       0 allocs/op
+BenchmarkHQSyncEnqDeqOn100000000Size50P-4    	50000000	        39.0 ns/op	      15 B/op	       0 allocs/op
+BenchmarkHQSyncEnqDeqOn1000Size255P-4        	50000000	        24.9 ns/op	       0 B/op	       0 allocs/op
+BenchmarkHQSyncEnqDeqOn100000Size255P-4      	50000000	        24.3 ns/op	       0 B/op	       0 allocs/op
+BenchmarkHQSyncEnqDeqOn1000000Size255P-4     	50000000	        31.0 ns/op	       1 B/op	       0 allocs/op
+BenchmarkHQSyncEnqDeqOn10000000Size255P-4    	50000000	        26.6 ns/op	       6 B/op	       0 allocs/op
+BenchmarkHQSyncEnqDeqOn100000000Size255P-4   	50000000	        34.1 ns/op	      13 B/op	       0 allocs/op
+PASS
+ok  	github.com/btools/basic-data-and-algorithms/priorityqueue	49.536s

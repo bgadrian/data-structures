@@ -1,4 +1,4 @@
-/*Package lists contains a series of data structures based on lists.
+/*Package linear contains a series of data structures based on lists.
 
 Stack - O(1) FILO based on linked lists, any values interface{}
 Queue - O(1) FIFO based on linked lists, any values interface{}
@@ -21,4 +21,4 @@ listNotSafe.Lock()
 listNotSafe.Unlock()
 
 For more details see the README and *_test.go*/
-package lists
+package linear

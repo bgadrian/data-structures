@@ -1,0 +1,11 @@
+goos: windows
+goarch: amd64
+pkg: github.com/btools/basic-data-and-algorithms/linear
+BenchmarkQueueSync1000-4      	   30000	     53909 ns/op	   48080 B/op	    1002 allocs/op
+BenchmarkQueueSync100000-4    	     100	  10815924 ns/op	 4800080 B/op	  100002 allocs/op
+BenchmarkQueueSync1000000-4   	      10	 123007870 ns/op	48000080 B/op	 1000002 allocs/op
+BenchmarkStackSync1000-4      	   30000	     54280 ns/op	   48080 B/op	    1002 allocs/op
+BenchmarkStackSync100000-4    	     100	  11081934 ns/op	 4800080 B/op	  100002 allocs/op
+BenchmarkStackSync1000000-4   	      10	 129716790 ns/op	48000080 B/op	 1000002 allocs/op
+PASS
+ok  	github.com/btools/basic-data-and-algorithms/linear	17.781s

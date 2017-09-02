@@ -1,4 +1,4 @@
-package lists
+package linear
 
 import (
 	"container/list"

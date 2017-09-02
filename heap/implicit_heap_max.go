@@ -1,4 +1,4 @@
-package tree
+package heap
 
 //ImplicitHeapMax A dynamic list of numbers, stored as a Binary tree in a dynamic slice.
 //Used to quickly get the biggest number from a list/queue/priority queue.

@@ -1,30 +1,28 @@
-package lists
+package linear
 
-import (
-	"fmt"
-	"sync"
-	"testing"
-	"time"
-)
+import "testing"
+import "time"
+import "sync"
+import "fmt"
 
-func TestQueueConcurrencyManualLock(t *testing.T) {
-	megaQueue := NewQueue(false)
+func TestConcurrencyManualLock(t *testing.T) {
+	megaStack := NewStack(false)
 
 	var group sync.WaitGroup
 
-	//spam enqueue
+	//spam push
 	for i := 0; i <= 100; i++ {
 		group.Add(1)
 		go func() {
 			for times := 0; times < 200; times++ {
-				megaQueue.Lock()
-				ok := megaQueue.Enqueue(times)
+				megaStack.Lock()
+				ok := megaStack.Push(times)
 
 				if ok == false {
 					t.Error("insert failed " + string(times))
 				}
 
-				megaQueue.Unlock()
+				megaStack.Unlock()
 
 				time.Sleep(time.Millisecond * 10)
 			}
@@ -32,20 +30,20 @@ func TestQueueConcurrencyManualLock(t *testing.T) {
 		}()
 	}
 
-	//spam dequeue
+	//spam pop and IsEmpty
 	for i := 0; i <= 100; i++ {
 		group.Add(1)
 		go func() {
 			for times := 0; times < 200; times++ {
-				megaQueue.Lock()
-				if megaQueue.HasElement() {
-					_, ok := megaQueue.Dequeue()
+				megaStack.Lock()
+				if megaStack.HasElement() {
+					_, ok := megaStack.Pop()
 
 					if ok == false {
 						t.Error("lock failed, hasElement() but Pop() failed")
 					}
 				}
-				megaQueue.Unlock()
+				megaStack.Unlock()
 				time.Sleep(time.Millisecond * 8)
 			}
 			group.Done()
@@ -55,16 +53,16 @@ func TestQueueConcurrencyManualLock(t *testing.T) {
 	group.Wait()
 }
 
-func TestQueueConcurrencyAutoLock(t *testing.T) {
+func TestConcurrencyAutoLock(t *testing.T) {
 
-	megaQueue := NewQueue(true)
+	megaStack := NewStack(true)
 	var group sync.WaitGroup
 
 	//spam peek
 	for i := 0; i <= 10; i++ {
 		go func() {
-			if megaQueue.HasElement() {
-				_, ok := megaQueue.Peek()
+			if megaStack.IsEmpty() == false {
+				_, ok := megaStack.Peek()
 
 				if ok == false {
 					//we ignore the stack was empty, because of the fast times this will happen, 1 stack vs lots of workers
@@ -72,12 +70,12 @@ func TestQueueConcurrencyAutoLock(t *testing.T) {
 				}
 			}
 			//spam for test coverage
-			if megaQueue.String() == "" {
+			if megaStack.String() == "" {
 				t.Error("String() failed")
 			}
 
 			//spam for test coverage
-			if megaQueue.Len() < 0 {
+			if megaStack.Len() < 0 {
 				t.Error("Len() failed")
 			}
 
@@ -85,12 +83,12 @@ func TestQueueConcurrencyAutoLock(t *testing.T) {
 		}()
 	}
 
-	//spam enqueue
+	//spam push
 	for i := 0; i <= 100; i++ {
 		group.Add(1)
 		go func() {
 			for times := 0; times < 200; times++ {
-				ok := megaQueue.Enqueue(times)
+				ok := megaStack.Push(times)
 
 				if ok == false {
 					t.Error("insert failed " + string(times))
@@ -102,13 +100,13 @@ func TestQueueConcurrencyAutoLock(t *testing.T) {
 		}()
 	}
 
-	//spam dequeue
+	//spam pop and IsEmpty
 	for i := 0; i <= 100; i++ {
 		group.Add(1)
 		go func() {
 			for times := 0; times < 200; times++ {
-				if megaQueue.HasElement() {
-					_, ok := megaQueue.Dequeue()
+				if megaStack.HasElement() {
+					_, ok := megaStack.Pop()
 
 					if ok == false {
 						//we ignore the stack was empty, because of the fast times this will happen, 1 stack vs lots of workers
@@ -124,20 +122,20 @@ func TestQueueConcurrencyAutoLock(t *testing.T) {
 	group.Wait()
 }
 
-func TestQueueBasicTypes(t *testing.T) {
+func TestStackBasicTypes(t *testing.T) {
 	for _, r := range fakeTable {
-		testQueueFunctionality(t, r)
+		testStackFunctionality(t, r)
 	}
 }
 
-func testQueueFunctionality(t *testing.T, toPush []interface{}) {
-	s := NewQueue(false)
+func testStackFunctionality(t *testing.T, toPush []interface{}) {
+	s := NewStack(false)
 
 	for i, v := range toPush {
-		ok := s.Enqueue(v)
+		ok := s.Push(v)
 
 		if ok == false {
-			t.Error("Enqueue failed ")
+			t.Error("push failed ")
 		}
 		len := s.Len()
 
@@ -151,20 +149,20 @@ func testQueueFunctionality(t *testing.T, toPush []interface{}) {
 			t.Error("peek failed")
 		}
 
-		if value != toPush[0] {
+		if value != v {
 			t.Errorf("peek failed, expected %v, got %v ", v, value)
 		}
 	}
 
-	for _, v := range toPush {
-		el, ok := s.Dequeue()
+	for i := len(toPush) - 1; i >= 0; i-- {
+		el, ok := s.Pop()
 
 		if ok == false {
-			t.Error("dequeue failed")
+			t.Error("pop failed")
 		}
 
-		if el != v {
-			t.Errorf("dequeue failed, expected %v, got %v", v, el)
+		if el != toPush[i] {
+			t.Errorf("pop failed, expected %v, got %v", toPush[i], el)
 		}
 	}
 
@@ -173,12 +171,12 @@ func testQueueFunctionality(t *testing.T, toPush []interface{}) {
 	}
 }
 
-func TestQueueInitPeekIsNil(t *testing.T) {
-	s := NewQueue(false)
+func TestInitPeekIsNil(t *testing.T) {
+	s := NewStack(false)
 	peek, ok := s.Peek()
 
 	if ok {
-		t.Error("peek should be false when used on an empty queue")
+		t.Error("peek should be false when used on an empty stack")
 	}
 
 	if peek != nil {
@@ -186,12 +184,12 @@ func TestQueueInitPeekIsNil(t *testing.T) {
 	}
 }
 
-func TestQueueInitPopIsNil(t *testing.T) {
-	s := NewQueue(false)
-	var pop, ok = s.Dequeue()
+func TestStackInitPopIsNil(t *testing.T) {
+	s := NewStack(false)
+	var pop, ok = s.Pop()
 
 	if ok {
-		t.Error("Pop should be false when used on an empty queue")
+		t.Error("Pop should be false when used on an empty stack")
 	}
 
 	if pop != nil {
@@ -199,66 +197,67 @@ func TestQueueInitPopIsNil(t *testing.T) {
 	}
 }
 
-func TestQueueInitIsEmpty(t *testing.T) {
-	helperInitIsEmpty("queue", NewQueue(false), t)
+func TestStackInitIsEmpty(t *testing.T) {
+	helperInitIsEmpty("stack", NewStack(false), t)
 }
 
-func TestQueueSkippingNewShouldPanic(t *testing.T) {
-	//TODO Should Queue implement lazyInit() method (like list.go has) so this should never happen?
+func TestStackSkippingNewShouldPanic(t *testing.T) {
+	//TODO Should Stack implement lazyInit() method (like list.go has) so this should never happen?
 	defer func() {
 		if r := recover(); r == nil {
 			t.Errorf("the code did not panic")
 		}
 	}()
-	s := Queue{}
+	s := Stack{}
 
 	c := s.Len()
 
 	fmt.Print(c)
 }
 
-func TestQueueStringer(t *testing.T) {
-	s := NewQueue(false)
+func TestStackStringer(t *testing.T) {
+	s := NewStack(false)
 
 	v := s.String()
-	if v != "Queue [0]" {
+	if v != "Stack [0]" {
 		t.Error("stringer was incorrect for 0 length" + v)
 	}
 
-	s.Enqueue(1)
-	s.Enqueue(1)
+	s.Push(1)
+	s.Push(1)
+	s.Push(1)
 
 	v = s.String()
-	if v != "Queue [2]" {
-		t.Error("stringer was incorrect for 2 length" + v)
+	if v != "Stack [3]" {
+		t.Error("stringer was incorrect for 3 length" + v)
 	}
 }
 
-func BenchmarkQueueSync1000(b *testing.B) {
-	benchQueueSync(1000, b)
+func BenchmarkStackSync1000(b *testing.B) {
+	benchStackSync(1000, b)
 }
 
-func BenchmarkQueueSync100000(b *testing.B) {
-	benchQueueSync(100000,b)
+func BenchmarkStackSync100000(b *testing.B) {
+	benchStackSync(100000, b)
 }
 
-func BenchmarkQueueSync1000000(b *testing.B) {
-	benchQueueSync(1000000, b)
+func BenchmarkStackSync1000000(b *testing.B) {
+	benchStackSync(1000000, b)
 }
 
-func benchQueueSync(count int, b *testing.B) {
+func benchStackSync(count int, b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		q := NewQueue(false)
+		q := NewStack(false)
 
 		for c := 0; c < count; c++ {
-			if q.Enqueue("a") == false {
-				b.Error("q enq failed")
+			if q.Push("a") == false {
+				b.Error("s push failed")
 			}
 		}
 
 		for c := 0; c < count; c++ {
-			if _, ok := q.Dequeue(); ok == false {
-				b.Error("q deq failed")
+			if _, ok := q.Pop(); ok == false {
+				b.Error("s pop failed")
 			}
 		}
 	}

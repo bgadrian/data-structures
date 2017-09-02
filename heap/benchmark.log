@@ -1,0 +1,11 @@
+goos: windows
+goarch: amd64
+pkg: github.com/btools/basic-data-and-algorithms/heap
+BenchmarkIHMinBuilding1000N100P-4      	   30000	     53160 ns/op	   57016 B/op	    1008 allocs/op
+BenchmarkIHMaxBuilding1000N100P-4      	   20000	     71659 ns/op	   57016 B/op	    1008 allocs/op
+BenchmarkIHMinBuilding1000000N255P-4   	       5	 271344560 ns/op	58331539 B/op	 1000018 allocs/op
+BenchmarkIHMin1000N2Ops255P-4          	20000000	       115 ns/op	       8 B/op	       0 allocs/op
+BenchmarkIHMin100000N2Ops255P-4        	10000000	       192 ns/op	       8 B/op	       0 allocs/op
+BenchmarkIHMin1000000N2Ops255P-4       	 3000000	       358 ns/op	       8 B/op	       0 allocs/op
+PASS
+ok  	github.com/btools/basic-data-and-algorithms/heap	26.684s

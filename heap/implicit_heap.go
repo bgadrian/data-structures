@@ -1,4 +1,4 @@
-package tree
+package heap
 
 /*ImplicitHeap is an interface for dynamic min & max implicit heaps.
 

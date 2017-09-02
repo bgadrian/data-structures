@@ -3,7 +3,8 @@ Learning Go and TDD while making efficient concurrent algorithms and data struct
 
 #### !! Warning This library wasn't used in production (yet). !!
 
-## Package Lists (linear data structures)
+## linear
+A collection of simple linear data structres, that are not in the standard Go lib.
 
 ### Stack [description](https://www.tutorialspoint.com/data_structures_algorithms/stack_algorithm.htm)
 Basic stack (FILO) using the builtin linked list, can store any type, concurrency safe, no size limit, implements Stringer.
@@ -11,7 +12,8 @@ Basic stack (FILO) using the builtin linked list, can store any type, concurrenc
 ### Queue [description](https://www.tutorialspoint.com/data_structures_algorithms/dsa_queue.htm) 
 Basic queue (FIFO) using the builtin linked list, can store any type, concurrency safe (optional mutex), no size limit, implements Stringer.
 
-## Package priorityqueue
+## priorityqueue
+A collection of performant, concurrent safe, complex abstract data structures used for priority queues.
 
 ### Hierarchical Queue [description](https://www.researchgate.net/figure/261191274_fig1_Figure-1-Simple-queue-a-and-hierarchical-queue-b) 
 An **O(1)/O(1) priority queue** implementation for small integers, that uses an assembly of N simple queues.
@@ -66,7 +68,8 @@ pkg: github.com/btools/basic-data-and-algorithms/src/data/lists
 
 *Previous implementation used list.List linked lists, they were replaced with a queue 10x faster.*
 
-## Package tree
+## heap
+A collection of basic abstract heap data structures.
 
 ### Implicit Heap [description](http://www.cs.princeton.edu/courses/archive/spr09/cos423/Lectures/i-heaps.pdf) [example](https://www.tutorialspoint.com/data_structures_algorithms/heap_data_structure.htm)
 Dynamic Min & Max Implicit heaps.
