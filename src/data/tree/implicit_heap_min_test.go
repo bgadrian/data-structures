@@ -158,6 +158,12 @@ func addIHNodes(h ImplicitHeap, c int) {
 	}
 }
 
+func addIHNodesWithMaxP(h ImplicitHeap, c int, maxP int) {
+	for i := 0; i < c; i++ {
+		h.Push(i%maxP, i)
+	}
+}
+
 func popIHNodes(h ImplicitHeap, c int, t *testing.T) {
 	for i := 0; i < c; i++ {
 		_, ok := h.Pop()

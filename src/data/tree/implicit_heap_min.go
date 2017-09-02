@@ -2,13 +2,15 @@ package tree
 
 import "sync"
 
-//ImplicitHeapMin A dynamic tree (list) of numbers, stored as a Binary tree in a slice.
+//ImplicitHeapMin A dynamic tree (list) of numbers, stored as a Binary tree in a dynamic slice.
 //Used to quickly get the smallest number from a list/queue/priority queue.
+//
+//It is a base struct for ImplicitHeapMax.
 type ImplicitHeapMin struct {
 	a             []implicitHeapNode
-	n             int //numbers in the heap
-	compare       ihCompare
-	autoLockMutex bool
+	n             int       //numbers in the heap
+	compare       ihCompare //different compare func for Min/Max
+	autoLockMutex bool      //auto locks the mutex for each func call
 	sync.Mutex
 }
 
@@ -18,7 +20,7 @@ func minShouldGoUp(p, c implicitHeapNode) bool {
 	return c.priority < p.priority
 }
 
-//NewImplicitHeapMin Constructor for IH Min
+//NewImplicitHeapMin Builds an empty ImplicitHeapMin
 func NewImplicitHeapMin(autoLockMutex bool) *ImplicitHeapMin {
 	h := &ImplicitHeapMin{
 		compare:       minShouldGoUp,
@@ -27,7 +29,7 @@ func NewImplicitHeapMin(autoLockMutex bool) *ImplicitHeapMin {
 	return h
 }
 
-//Push Push a new number in the list.
+//Push Insert a new key/value pair in the list.
 func (h *ImplicitHeapMin) Push(priority int, value interface{}) {
 	if h.autoLockMutex {
 		h.Lock()
@@ -69,7 +71,9 @@ func (h *ImplicitHeapMin) Push(priority int, value interface{}) {
 	}
 }
 
-//Peek Find-Min returns the minimum value (root element) O(1)
+//Peek Find-* returns the first value (root element) O(1).
+//For ImplicitHeapMin returns the value for the smallest key(priority).
+//For ImplicitHeapMax returns the value for the largest key(priority).
 //Does not mutate the list
 func (h *ImplicitHeapMin) Peek() (v interface{}, ok bool) {
 	if h.autoLockMutex {
@@ -84,7 +88,9 @@ func (h *ImplicitHeapMin) Peek() (v interface{}, ok bool) {
 	return h.a[0].value, true
 }
 
-//Pop Delete-Min, return the minimum value (root element) O(log(n))
+//Pop Delete-*, return the first value (root element) O(log(n))
+//For ImplicitHeapMin returns the value for the smallest key(priority).
+//For ImplicitHeapMax returns the value for the largest key(priority).
 //Removes the element from the list
 func (h *ImplicitHeapMin) Pop() (v interface{}, ok bool) {
 	if h.autoLockMutex {
@@ -165,7 +171,7 @@ func (h *ImplicitHeapMin) Reset() {
 	h.n = 0
 }
 
-//IsDepleted Check if the Heap is empty
+//IsDepleted Check if the list is empty
 func (h *ImplicitHeapMin) IsDepleted() bool {
 	if h.autoLockMutex {
 		h.Lock()
@@ -175,7 +181,7 @@ func (h *ImplicitHeapMin) IsDepleted() bool {
 	return h.n == 0
 }
 
-//HasElement Check if at least 1 element is in the Heap
+//HasElement Check if the list has at least 1 elment left
 func (h *ImplicitHeapMin) HasElement() bool {
 	if h.autoLockMutex {
 		h.Lock()

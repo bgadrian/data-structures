@@ -41,3 +41,4 @@ $RECYCLE.BIN/
 
 debug*
 profile*
+!benchmark.log

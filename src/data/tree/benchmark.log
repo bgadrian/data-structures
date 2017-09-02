@@ -1,0 +1,11 @@
+goos: windows
+goarch: amd64
+pkg: github.com/btools/basic-data-and-algorithms/src/data/tree
+BenchmarkIHMinBuilding1000N100P-4      	   30000	     53702 ns/op	   57016 B/op	    1008 allocs/op
+BenchmarkIHMaxBuilding1000N100P-4      	   20000	     64160 ns/op	   57016 B/op	    1008 allocs/op
+BenchmarkIHMinBuilding1000000N255P-4   	       5	 215835180 ns/op	58331539 B/op	 1000018 allocs/op
+BenchmarkIHMin1000N2Ops255P-4          	20000000	       106 ns/op	       8 B/op	       0 allocs/op
+BenchmarkIHMin100000N2Ops255P-4        	10000000	       180 ns/op	       8 B/op	       0 allocs/op
+BenchmarkIHMin1000000N2Ops255P-4       	 5000000	       295 ns/op	       8 B/op	       0 allocs/op
+PASS
+ok  	github.com/btools/basic-data-and-algorithms/src/data/tree	26.418s
