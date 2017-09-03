@@ -1,15 +1,22 @@
 goos: windows
 goarch: amd64
-pkg: github.com/btools/basic-data-and-algorithms/priorityqueue
-BenchmarkHQSyncEnqDeqOn1000Size50P-4         	50000000	        24.6 ns/op	       0 B/op	       0 allocs/op
-BenchmarkHQSyncEnqDeqOn100000Size50P-4       	50000000	        25.9 ns/op	       0 B/op	       0 allocs/op
-BenchmarkHQSyncEnqDeqOn1000000Size50P-4      	50000000	        25.8 ns/op	       1 B/op	       0 allocs/op
-BenchmarkHQSyncEnqDeqOn10000000Size50P-4     	50000000	        27.9 ns/op	       5 B/op	       0 allocs/op
-BenchmarkHQSyncEnqDeqOn100000000Size50P-4    	50000000	        39.0 ns/op	      15 B/op	       0 allocs/op
-BenchmarkHQSyncEnqDeqOn1000Size255P-4        	50000000	        24.9 ns/op	       0 B/op	       0 allocs/op
-BenchmarkHQSyncEnqDeqOn100000Size255P-4      	50000000	        24.3 ns/op	       0 B/op	       0 allocs/op
-BenchmarkHQSyncEnqDeqOn1000000Size255P-4     	50000000	        31.0 ns/op	       1 B/op	       0 allocs/op
-BenchmarkHQSyncEnqDeqOn10000000Size255P-4    	50000000	        26.6 ns/op	       6 B/op	       0 allocs/op
-BenchmarkHQSyncEnqDeqOn100000000Size255P-4   	50000000	        34.1 ns/op	      13 B/op	       0 allocs/op
+pkg: github.com/btools/data-structures/priorityqueue
+BenchmarkHHSyncEnqDeqOn1000Size50P5B-4          	20000000	       101 ns/op	       0 B/op	       0 allocs/op
+BenchmarkHHSyncEnqDeqOn1000Size50P25B-4         	10000000	       136 ns/op	       0 B/op	       0 allocs/op
+BenchmarkHHSyncEnqDeqOn100000Size50P10B-4       	10000000	       121 ns/op	       1 B/op	       0 allocs/op
+BenchmarkHHSyncEnqDeqOn1000000Size50P10B-4      	 5000000	       230 ns/op	      30 B/op	       0 allocs/op
+BenchmarkHHSyncEnqDeqOn10000000Size500P5B-4     	 1000000	      1063 ns/op	     402 B/op	       0 allocs/op
+BenchmarkHHSyncEnqDeqOn10000000Size500P50B-4    	 5000000	       415 ns/op	     122 B/op	       0 allocs/op
+BenchmarkHHSyncEnqDeqOn10000000Size500P501B-4   	10000000	       673 ns/op	      71 B/op	       0 allocs/op
+BenchmarkHQSyncEnqDeqOn1000Size50P-4            	30000000	        50.4 ns/op	       0 B/op	       0 allocs/op
+BenchmarkHQSyncEnqDeqOn100000Size50P-4          	30000000	        51.2 ns/op	       0 B/op	       0 allocs/op
+BenchmarkHQSyncEnqDeqOn1000000Size50P-4         	20000000	        54.0 ns/op	       2 B/op	       0 allocs/op
+BenchmarkHQSyncEnqDeqOn10000000Size50P-4        	30000000	        60.1 ns/op	       7 B/op	       0 allocs/op
+BenchmarkHQSyncEnqDeqOn100000000Size50P-4       	30000000	        61.2 ns/op	      16 B/op	       0 allocs/op
+BenchmarkHQSyncEnqDeqOn1000Size255P-4           	20000000	        50.7 ns/op	       1 B/op	       0 allocs/op
+BenchmarkHQSyncEnqDeqOn100000Size255P-4         	20000000	        51.4 ns/op	       1 B/op	       0 allocs/op
+BenchmarkHQSyncEnqDeqOn1000000Size255P-4        	20000000	        54.3 ns/op	       4 B/op	       0 allocs/op
+BenchmarkHQSyncEnqDeqOn10000000Size255P-4       	20000000	        63.5 ns/op	       9 B/op	       0 allocs/op
+BenchmarkHQSyncEnqDeqOn100000000Size255P-4      	20000000	        61.1 ns/op	      15 B/op	       0 allocs/op
 PASS
-ok  	github.com/btools/basic-data-and-algorithms/priorityqueue	49.536s
+ok  	github.com/btools/data-structures/priorityqueue	114.928s

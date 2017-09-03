@@ -2,6 +2,7 @@ package priorityqueue
 
 import (
 	"math"
+	"math/rand"
 	"runtime"
 	"sync"
 	"testing"
@@ -371,13 +372,15 @@ func benchmarkHQSyncEnqDeqOne(count int, lowestP uint8, b *testing.B) {
 	l := NewHierarchicalQueue(lowestP, false)
 	var err error
 
+	rand.Seed(1)
+
 	for i := 0; i < count; i++ {
-		l.Enqueue("a", uint8(i)%lowestP)
+		l.Enqueue("a", uint8(rand.Intn(int(lowestP))))
 	}
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		err = l.Enqueue("a", uint8(i)%lowestP)
+		err = l.Enqueue("a", uint8(rand.Intn(int(lowestP))))
 
 		if err != nil {
 			b.Error(err)

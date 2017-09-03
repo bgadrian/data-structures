@@ -13,7 +13,11 @@ type testIHTuple struct {
 func TestIHMinBasic(t *testing.T) {
 	h := NewImplicitHeapMin(false)
 
+	quickAssert(0, h.Len(), "has length after init", t)
+
 	h.Push(6, 6)
+
+	quickAssert(1, h.Len(), "has length after 1push", t)
 
 	v, ok := h.Peek()
 	if ok == false {

@@ -8,6 +8,9 @@ import (
 )
 
 //HierarchicalQueue An O(1)/O(1)* priority queue implementation for small integers
+//
+//Caution: O(1) is not kept for the following scenario: Deplete queues (by dequeue),
+//add more elements (enqueue), resume dequeue.
 //See the README for more info.
 type HierarchicalQueue struct {
 	autoLock bool
@@ -86,7 +89,8 @@ func (l *HierarchicalQueue) removeEmptyQ() {
 }
 
 //Dequeue Return the highest priority value (0-highest priority, n-lowest)
-//Recommended: start to Dequeue AFTER you Enqueue ALL the elements
+//
+//Recommended: start to Dequeue AFTER you Enqueue ALL the elements,
 func (l *HierarchicalQueue) Dequeue() (interface{}, error) {
 	if l.autoLock {
 		l.Lock()
@@ -116,6 +120,8 @@ func (l *HierarchicalQueue) Dequeue() (interface{}, error) {
 }
 
 //IsDepleted If all the queues are empty and removed this instance cannot be used anymore
+//
+//Do NOT use this HQ instance once is depleted, the performance will be heavily impacted.
 func (l *HierarchicalQueue) IsDepleted() bool {
 	if l.autoLock {
 		l.Lock()

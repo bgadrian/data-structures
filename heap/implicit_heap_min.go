@@ -99,7 +99,7 @@ func (h *ImplicitHeapMin) Pop() (v interface{}, ok bool) {
 	}
 
 	if h.n <= 0 {
-		return 0, false
+		return
 	}
 
 	//pop the root, exchange it with the last leaf
@@ -189,4 +189,14 @@ func (h *ImplicitHeapMin) HasElement() bool {
 	}
 
 	return h.n > 0
+}
+
+//Len How many elements are in the heap
+func (h *ImplicitHeapMin) Len() int {
+	if h.autoLockMutex {
+		h.Lock()
+		defer h.Unlock()
+	}
+
+	return h.n
 }
