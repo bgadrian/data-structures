@@ -5,18 +5,16 @@ A collection of performant, concurrent safe, complex abstract data structures us
 *Priority queue is an abstract data type which is like a regular queue or stack data structure, but where additionally each element has a "priority" associated with it. In a priority queue, an element with high priority is served before an element with low priority.*
 
 ## Hierarchical Queue [description](https://www.researchgate.net/figure/261191274_fig1_Figure-1-Simple-queue-a-and-hierarchical-queue-b) 
-An **O(1)/O(1) priority queue** implementation for small integers, that uses an assembly of N simple queues.
+An **O(1)/O(1 + K) priority queue** implementation for small integers, that uses an assembly of N simple queues.
 
 It is optimized for large amount of data BUT with small value priorities ( <= 255 ). Can store any type of elements/values. 
 
-For best performance **Enqueue ALL the elements before starting to Dequeue**.
-The downsides:
-- the instance cannot be reused because ...
-- once a priority queue is empty and removed, it cannot be recreated
 #### Hierarchical Queue usages 
 * image/video processing
 * networking (routing)
 * anywhere you have a small range of priorities/channels.
+
+**The original algorithm has O(1) dequeue complexity, but that adds a very strict limitation: a queue that has been empty it is removed and cannot be recreated. This means the instance cannot be reused once the dequeue finish, and inserting elements during the dequeue decrease the performance. I decided that limits the scope of the algorithm too much and has a low chance to be used in the real world, so I removed the complexity.**
 
 #### Hierarchical Queue implementation:
 
@@ -25,7 +23,6 @@ The downsides:
 (a) - normal queue, (b) - list of queues
 
 It is an array of buckets. The key is the priority and the bucket is a queue. Queues are ~~linked lists~~ [dynamically growing circular slice of blocks](https://github.com/karalabe/cookiejar/tree/master/collections/queue), the advantage is that no memory preallocation is needed and the queue/dequeue is O(1).
-We dequeue from highest priority (0) until it's bucket (queue) is empty and we remove it. We move to the next priority (1) and so on until we deplete the structure.
 
 The keys are ```uint8```and values can be any type ```interface{}```.
 
@@ -42,12 +39,10 @@ The avg value is ```50 ns/op``` using random distributed priorities and ``` 25 n
 
 *Previous implementation used list.List linked lists, they were replaced with a queue 10x faster.*
 
-
 ## Hierarhical Heap
-It is a modification of the Hierarchical Queue structure, adding some complexity (O(log n/k)) but removing it's limitations.
-Inspired by [Cris L. Luengo Hendriks paper](http://www.cb.uu.se/~cris/Documents/Luengo2010a_preprint.pdf)
+It is a version of the Hierarchical Queue structure, adding some complexity (O(log n/k)) but removing it's limitations, proposed by [Cris L. Luengo Hendriks paper](http://www.cb.uu.se/~cris/Documents/Luengo2010a_preprint.pdf)
 
-Unlike HQ that has 1 bucket for each priority value, HHeap priorities are grouped in K buckets.
+Unlike HQ that has 1 bucket for each priority value, HH priorities are grouped in K buckets.
 
 **For the best performance benchmark the Enq/Deq functions with your own data, and tweak the buckets,minP,maxP parameters!**
 
@@ -74,5 +69,5 @@ O(logN/k) if the buckets are chosen correctly. Of course, the actual algorithmic
 
 #### [Hierarchical Heap benchmarks](benchmark.log)
 
-With the right bucket/priority diversity it can reach up to 2x the performance of a Hierarchical Queue.
+With the right bucket/priority diversity it can aproach the HQ performance by a factor of 0.5.
 

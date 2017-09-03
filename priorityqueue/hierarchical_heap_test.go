@@ -24,10 +24,11 @@ func TestHHBasic(t *testing.T) {
 
 	quickAssert(1, h.Len(), "length after 1 enqueue", t)
 
-	v, ok := h.Dequeue()
+	var v interface{}
+	v, err = h.Dequeue()
 
-	if ok == false {
-		t.Error("dequeue failed")
+	if err != nil {
+		t.Error(err)
 		return
 	}
 
@@ -74,10 +75,10 @@ func TestHHOverflow(t *testing.T) {
 		t.Error(err)
 	}
 
-	_, ok := h.Dequeue()
+	_, err = h.Dequeue()
 
-	if ok == true {
-		t.Error("ok is true for deq after init")
+	if err == nil {
+		t.Error("dequeue didn't returned error when empty")
 	}
 
 	err = h.Enqueue("a", -1)
@@ -138,7 +139,6 @@ func testHHSyncEnqDeqOne(seed int64, count int, lowestP int, buckets int, b *tes
 		b.Error(err)
 		return
 	}
-	var ok bool
 
 	rand.Seed(seed)
 
@@ -149,10 +149,10 @@ func testHHSyncEnqDeqOne(seed int64, count int, lowestP int, buckets int, b *tes
 	for i := 0; i < 100; i++ {
 		h.Enqueue("a", rand.Intn(lowestP))
 
-		_, ok = h.Dequeue()
+		_, err = h.Dequeue()
 
-		if ok == false {
-			b.Error("dequeue failed")
+		if err != nil {
+			b.Error(err)
 		}
 	}
 }
@@ -214,10 +214,10 @@ func testHHLocks(autoLock bool, t *testing.T) {
 					megaHH.Lock()
 				}
 
-				_, ok := megaHH.Dequeue()
+				_, err := megaHH.Dequeue()
 
-				if ok == false {
-					t.Error("dequeue failed")
+				if err != nil {
+					t.Error(err)
 				}
 
 				if autoLock == false {
@@ -292,8 +292,6 @@ func benchmarkHHSyncEnqDeqOne(count int, lowestP int, buckets int, b *testing.B)
 		b.Error(err)
 		return
 	}
-	var ok bool
-
 	rand.Seed(2)
 
 	for i := 0; i < count; i++ {
@@ -304,10 +302,12 @@ func benchmarkHHSyncEnqDeqOne(count int, lowestP int, buckets int, b *testing.B)
 	for i := 0; i < b.N; i++ {
 		h.Enqueue("a", rand.Intn(lowestP))
 
-		_, ok = h.Dequeue()
+		_, err = h.Dequeue()
 
-		if ok == false {
-			b.Error("dequeue failed")
+		if err != nil {
+			b.Error(err)
+			return
 		}
+
 	}
 }

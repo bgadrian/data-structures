@@ -8,28 +8,21 @@ import (
 )
 
 //HierarchicalQueue An O(1)/O(1)* priority queue implementation for small integers
-//
-//Caution: O(1) is not kept for the following scenario: Deplete queues (by dequeue),
-//add more elements (enqueue), resume dequeue.
 //See the README for more info.
 type HierarchicalQueue struct {
 	autoLock bool
 	q        []*deque.Deque
-	lowestP  uint8
-	highestP uint8
 	sync.Mutex
-	depleted bool
-	count    int
+	count   int
+	lowestP int
 }
 
 //NewHierarchicalQueue Generates a new HQ
 func NewHierarchicalQueue(lowestPriority uint8, autoMutexLock bool) *HierarchicalQueue {
 	return &HierarchicalQueue{
 		q:        make([]*deque.Deque, uint16(lowestPriority)+1),
-		lowestP:  lowestPriority,
-		highestP: 0, //advances to lowestP to empty all queues
+		lowestP:  int(lowestPriority),
 		autoLock: autoMutexLock,
-		depleted: false,
 	}
 }
 
@@ -40,94 +33,45 @@ func (l *HierarchicalQueue) Enqueue(value interface{}, priority uint8) (err erro
 		defer l.Unlock()
 	}
 
-	if l.depleted {
-		return errors.New("depleted queue") //nothing to do
-	}
-
-	if priority > l.lowestP {
-		return errors.New("priority is bigger than max priority")
+	if priority > uint8(l.lowestP) {
+		priority = uint8(l.lowestP)
 	}
 
 	if l.q[priority] == nil {
 		l.q[priority] = deque.New()
 	}
 
-	//special exception when we already began to take elements out and empty queues
-	//we add all the new elements in the current queue
-	//if their priority is smaller than the current one
-	//The HQ rule is "when a queue is empty and removed, it cannot be recreated"
-	if priority < l.highestP {
-		l.q[l.highestP].PushLeft(value)
-	} else {
-		l.q[priority].PushRight(value)
-	}
+	//TODO learn how to do this/break dequeue
+	// if l.q[priority] == nil {
+	// 	return errors.New("cannot create a queue deque")
+	// }
+
+	l.q[priority].PushRight(value)
 
 	l.count++
 
 	return nil
 }
 
-//removeEmptyQ Advance to the next queue.
-//You may experience some performance hickups if you have sparse priority values ex: 0,1,2,3,250,251 ..
-func (l *HierarchicalQueue) removeEmptyQ() {
-	for {
-		//we found a non empty queue, do NOT advance
-		if l.q[l.highestP] != nil && l.q[l.highestP].Size() > 0 {
-			break
-		}
-
-		//remove the empty queue
-		l.q[l.highestP] = nil
-
-		if l.highestP == l.lowestP {
-			l.depleted = true
-			break
-		}
-
-		l.highestP++
-	}
-}
-
 //Dequeue Return the highest priority value (0-highest priority, n-lowest)
-//
-//Recommended: start to Dequeue AFTER you Enqueue ALL the elements,
-func (l *HierarchicalQueue) Dequeue() (interface{}, error) {
+func (l *HierarchicalQueue) Dequeue() (v interface{}, err error) {
 	if l.autoLock {
 		l.Lock()
 		defer l.Unlock()
 	}
 
-	if l.depleted {
-		return nil, errors.New("depleted queue") //nothing to do
-	}
-
-	//this covers the case when you start to Deq before Enq
-	if l.q[l.highestP] == nil || l.q[l.highestP].Size() == 0 {
-		l.removeEmptyQ()
-
-		if l.depleted {
-			return nil, errors.New("depleted queue") //nothing to do
+	for i := 0; i <= l.lowestP; i++ {
+		if l.q[i] == nil || l.q[i].Empty() {
+			continue
 		}
+
+		v = l.q[i].PopLeft()
+		l.count--
+		return
 	}
 
-	element := l.q[l.highestP].PopLeft()
-
-	l.count--
-	//make sure next time we have something to dequeue
-	l.removeEmptyQ()
-
-	return element, nil
-}
-
-//IsDepleted If all the queues are empty and removed this instance cannot be used anymore
-//
-//Do NOT use this HQ instance once is depleted, the performance will be heavily impacted.
-func (l *HierarchicalQueue) IsDepleted() bool {
-	if l.autoLock {
-		l.Lock()
-		defer l.Unlock()
-	}
-	return l.depleted
+	err = errors.New("the queue is empty")
+	return
 }
 
 //Len Return the count of all values from all priorities
@@ -147,9 +91,9 @@ func (l *HierarchicalQueue) LenPriority(priority uint8) int {
 		defer l.Unlock()
 	}
 
-	if l.q[priority] != nil {
-		return l.q[priority].Size()
+	if l.q[priority] == nil {
+		return 0
 	}
 
-	return 0
+	return l.q[priority].Size()
 }

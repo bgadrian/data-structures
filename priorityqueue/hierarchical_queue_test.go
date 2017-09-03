@@ -39,12 +39,7 @@ func TestHQPriorityBounds(t *testing.T) {
 	testHQenq(l, "a", math.MaxUint8-1, t)
 	testHQenq(l, "a", math.MaxUint8, t)
 }
-func TestHQOverflowPriority(t *testing.T) {
-	l := NewHierarchicalQueue(1, false)
-	if err := l.Enqueue("a", 2); err == nil {
-		t.Error("enq a priority > max didn't returned an error")
-	}
-}
+
 func TestHQTwo(t *testing.T) {
 	l := NewHierarchicalQueue(1, false)
 	testHQenq(l, "a", 0, t)
@@ -110,22 +105,18 @@ func TestHQDeqFirst(t *testing.T) {
 	if _, err := l.Dequeue(); err == nil {
 		t.Error("enq on an empty HQ does not return error")
 	}
-
-	if l.IsDepleted() == false {
-		t.Error("deq an empty HQ should have depleted it")
-	}
 }
-func TestHQDeqDepleted(t *testing.T) {
+func TestHQDeqOverflow(t *testing.T) {
 	l := NewHierarchicalQueue(1, false)
-	l.Dequeue()
 
 	if _, err := l.Dequeue(); err == nil {
-		t.Error("deq on a depleted HQ does not return error")
+		t.Error("deq on an empty HQ does not return error")
 	}
 
-	if err := l.Enqueue("a", 0); err == nil {
-		t.Error("enq on a depleted HQ does not return error")
+	if err := l.Enqueue("a", 100); err != nil {
+		t.Error("enq a bigger priority returns error")
 	}
+
 }
 
 func TestHQEnqAfterDeqBigger(t *testing.T) {
@@ -135,22 +126,6 @@ func TestHQEnqAfterDeqBigger(t *testing.T) {
 
 	testHQdeq(l, "a", t)
 	testHQenq(l, "c", 2, t)
-
-	testHQdeq(l, "b", t)
-	testHQdeq(l, "c", t)
-}
-
-//TestHQEnqAfterDeqSmaller Edgecase, enq a smaller priority than the current one
-func TestHQEnqAfterDeqSmaller(t *testing.T) {
-	l := NewHierarchicalQueue(1, false)
-	testHQenq(l, "c", 1, t)
-	testHQenq(l, "a", 0, t)
-
-	testHQdeq(l, "a", t) //should advance to 1 now
-	if l.highestP != 1 {
-		t.Errorf("highestP expected %v, got %v", 1, l.highestP)
-	}
-	testHQenq(l, "b", 0, t) //add 0 < 1
 
 	testHQdeq(l, "b", t)
 	testHQdeq(l, "c", t)
@@ -194,10 +169,6 @@ func hqTestArrKeyIsPriority(arr []interface{}, t *testing.T) {
 			t.Errorf("deq failed, expected %v got %v for %v", v, elem, arr)
 		}
 	}
-
-	if l.IsDepleted() == false {
-		t.Errorf("HQ is not depleted after deq all elem %v", arr)
-	}
 }
 
 func TestHQConcurrencyManualLock(t *testing.T) {
@@ -225,12 +196,6 @@ func testHQLocks(autoLock bool, t *testing.T) {
 			for ; times < 200; times++ {
 				if autoLock == false {
 					megaHQ.Lock()
-				}
-				if megaHQ.IsDepleted() {
-					if autoLock == false {
-						megaHQ.Unlock()
-					}
-					break
 				}
 
 				err := megaHQ.Enqueue("a", times%lowestP)
@@ -261,12 +226,6 @@ func testHQLocks(autoLock bool, t *testing.T) {
 					megaHQ.Lock()
 				}
 
-				if megaHQ.IsDepleted() {
-					if autoLock == false {
-						megaHQ.Unlock()
-					}
-					break
-				}
 				_, err := megaHQ.Dequeue()
 
 				if err != nil {

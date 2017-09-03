@@ -87,7 +87,7 @@ func (h *HierarchicalHeap) Enqueue(value interface{}, priority int) error {
 }
 
 //Dequeue Remove and return the highest key (lowest priority) O(log n/k)
-func (h *HierarchicalHeap) Dequeue() (v interface{}, ok bool) {
+func (h *HierarchicalHeap) Dequeue() (v interface{}, err error) {
 	if h.autoLock {
 		h.Lock()
 		defer h.Unlock()
@@ -97,11 +97,20 @@ func (h *HierarchicalHeap) Dequeue() (v interface{}, ok bool) {
 		if h.a[i] == nil || h.a[i].IsDepleted() {
 			continue
 		}
-		v, ok = h.a[i].Pop()
+		val, _ := h.a[i].Pop()
+
+		//can't replicate this scenario
+		// if ok == false {
+		// 	err = errors.New("queue pop failed")
+		// 	return
+		// }
+
+		v = val
 		h.count--
 		return
 	}
 
+	err = errors.New("the queue is empty")
 	return
 }
 
