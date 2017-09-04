@@ -24,6 +24,7 @@ type HierarchicalHeap struct {
 	buckets int
 	count   int
 	a       []*heap.ImplicitHeapMin //buckets of heaps
+	smB     int                     //smallest bucket index that has values, cached for optimization
 }
 
 //NewHierarchicalHeap Generates a new HQ. 0 priority = max
@@ -45,7 +46,7 @@ func NewHierarchicalHeap(buckets, pMin, pMax int, autoMutexLock bool) (*Hierarch
 	}, nil
 }
 
-func (h *HierarchicalHeap) getBucket(priority int) *heap.ImplicitHeapMin {
+func (h *HierarchicalHeap) getBucket(priority int) (*heap.ImplicitHeapMin, int) {
 	//not ideal and performant, but we can deal with higher/lower priorities
 	if priority > h.pMax {
 		priority = h.pMax
@@ -67,7 +68,7 @@ func (h *HierarchicalHeap) getBucket(priority int) *heap.ImplicitHeapMin {
 		h.a[i] = heap.NewImplicitHeapMin(false)
 	}
 
-	return h.a[i]
+	return h.a[i], i
 }
 
 //Enqueue add a new key/value pair in the queue. 0 priority = max. O(log n/k)
@@ -77,7 +78,12 @@ func (h *HierarchicalHeap) Enqueue(value interface{}, priority int) error {
 		defer h.Unlock()
 	}
 
-	bucket := h.getBucket(priority)
+	bucket, bucketIndex := h.getBucket(priority)
+
+	if bucketIndex < h.smB {
+		h.smB = bucketIndex
+	}
+
 	// if bucket == nil {
 	// 	return errors.New("cannot get bucket for " + string(priority))
 	// }
@@ -93,10 +99,11 @@ func (h *HierarchicalHeap) Dequeue() (v interface{}, err error) {
 		defer h.Unlock()
 	}
 
-	for i := 0; i < h.buckets; i++ {
+	for i := h.smB; i < h.buckets; i++ {
 		if h.a[i] == nil || h.a[i].IsDepleted() {
 			continue
 		}
+		h.smB = i
 		val, _ := h.a[i].Pop()
 
 		//can't replicate this scenario

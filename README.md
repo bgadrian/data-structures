@@ -8,7 +8,7 @@ All the packages have 100+% test coverage, benchmark tests and godocs. Tested wi
 #### !! Warning This library wasn't used in production (yet). !!
 
 ## [priorityqueue](priorityqueue/README.md)  [![GoDoc](https://godoc.org/golang.org/x/tools/cmd/godoc?status.svg)](https://godoc.org/github.com/BTooLs/data-structures/priorityqueue)
-A collection of performant, concurrent safe, complex abstract data structures used for priority queues.
+A collection of high performance, concurrent safe, complex abstract data structures used for priority queues.
 
 *Priority queue is an abstract data type which is like a regular queue or stack data structure, but where additionally each element has a "priority" associated with it. In a priority queue, an element with high priority is served before an element with low priority.*
 

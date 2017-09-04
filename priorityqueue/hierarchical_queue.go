@@ -15,6 +15,7 @@ type HierarchicalQueue struct {
 	sync.Mutex
 	count   int
 	lowestP int
+	smP     uint8 //smallest queue that has elements,cache for optimization
 }
 
 //NewHierarchicalQueue Generates a new HQ
@@ -50,6 +51,10 @@ func (l *HierarchicalQueue) Enqueue(value interface{}, priority uint8) (err erro
 
 	l.count++
 
+	if priority < l.smP {
+		l.smP = priority
+	}
+
 	return nil
 }
 
@@ -60,11 +65,12 @@ func (l *HierarchicalQueue) Dequeue() (v interface{}, err error) {
 		defer l.Unlock()
 	}
 
-	for i := 0; i <= l.lowestP; i++ {
+	for i := int(l.smP); i <= l.lowestP; i++ {
 		if l.q[i] == nil || l.q[i].Empty() {
 			continue
 		}
 
+		l.smP = uint8(i)
 		v = l.q[i].PopLeft()
 		l.count--
 		return
