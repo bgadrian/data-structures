@@ -29,9 +29,13 @@ A collection of basic abstract heap data structures.
 Dynamic Min & Max Implicit heaps.
 Insert (push) and remove min/max (pop) have ```O(log n)``` complexity. The keys are ```int```and values can be any type ```interface{}```.
 
+## [graph](graph/README.md) [![GoDoc](https://godoc.org/golang.org/x/tools/cmd/godoc?status.svg)](https://godoc.org/github.com/BTooLs/data-structures/graph)
+A collection of simple graph data structures, used for **academic purposes**.
+### AdjacencyList [description](https://en.wikipedia.org/wiki/Adjacency_list)
+AdjacencyList is a collection of unordered lists used to represent a finite graph. The graph is undirected with values on nodes and edges.
 
 ## [linear](linear/README.md) [![GoDoc](https://godoc.org/golang.org/x/tools/cmd/godoc?status.svg)](https://godoc.org/github.com/BTooLs/data-structures/linear)
-A collection of **(not so performant)** simple linear data structres, that are not in the standard Go lib.
+A collection of simple linear data structres, that are not in the standard Go lib, built for academic purposes.
 
 ### Stack [description](https://www.tutorialspoint.com/data_structures_algorithms/stack_algorithm.htm)
 Basic stack (FILO) using the builtin linked list, can store any type, concurrency safe, no size limit, implements Stringer.

@@ -2,10 +2,11 @@ package graph
 
 import "errors"
 
-//AdjacencyList is a collection of unordered lists used to represent a finite graph. Each list describes the set of neighbors of a vertex in the graph.
+//AdjacencyList is a collection of unordered lists used to represent a finite graph.
+//Each list describes the set of neighbors of a vertex in the graph.
 //This is one of several commonly used representations of graphs for use in computer programs.
 type AdjacencyList struct {
-	a map[*Node]map[*Node]empty
+	a map[*Node]map[*Node]interface{}
 }
 
 func (g *AdjacencyList) lazyInit() {
@@ -13,7 +14,7 @@ func (g *AdjacencyList) lazyInit() {
 		return
 	}
 
-	g.a = make(map[*Node]map[*Node]empty)
+	g.a = make(map[*Node]map[*Node]interface{})
 }
 
 //AddNode Add a vertex, if doesn't exists already.
@@ -22,12 +23,12 @@ func (g *AdjacencyList) AddNode(x ...*Node) {
 
 	for _, n := range x {
 		if g.a[n] == nil {
-			g.a[n] = make(map[*Node]empty)
+			g.a[n] = make(map[*Node]interface{})
 		}
 	}
 }
 
-//RemoveNode ...
+//RemoveNode Remove a vertex from the graph.
 func (g *AdjacencyList) RemoveNode(x ...*Node) {
 
 	g.lazyInit()
@@ -41,7 +42,7 @@ func (g *AdjacencyList) RemoveNode(x ...*Node) {
 	}
 }
 
-//AddEdge ...
+//AddEdge Add a vertice between 2 nodes.
 func (g *AdjacencyList) AddEdge(x, y *Node) error {
 	g.lazyInit()
 
@@ -52,19 +53,36 @@ func (g *AdjacencyList) AddEdge(x, y *Node) error {
 		return errors.New("node Y doesn't exists")
 	}
 
-	g.a[x][y] = empty{}
-	g.a[y][x] = empty{}
+	g.a[x][y] = nil
+	g.a[y][x] = nil
 	return nil
 }
 
-//LenNodes ...
+//RemoveEdge Remove a vertice between two nodes
+func (g *AdjacencyList) RemoveEdge(x, y *Node) error {
+	g.lazyInit()
+
+	if _, ok := g.a[x]; ok == false {
+		return errors.New("node X doesn't exists")
+	}
+
+	if _, ok := g.a[y]; ok == false {
+		return errors.New("node Y doesn't exists")
+	}
+
+	delete(g.a[x], y)
+	delete(g.a[y], x)
+	return nil
+}
+
+//LenNodes How many distinct nodes are in the graph.
 func (g *AdjacencyList) LenNodes() int {
 	g.lazyInit()
 
 	return len(g.a)
 }
 
-//Adjacent ...
+//Adjacent Check if two nodes are connected with an edge.
 func (g *AdjacencyList) Adjacent(x, y *Node) (bool, error) {
 	g.lazyInit()
 
@@ -77,4 +95,78 @@ func (g *AdjacencyList) Adjacent(x, y *Node) (bool, error) {
 
 	_, ok := g.a[x][y]
 	return ok, nil
+}
+
+//GetNodeValue Returns the nodes value (alias x.v)
+func (g *AdjacencyList) GetNodeValue(x *Node) (interface{}, error) {
+	g.lazyInit()
+
+	if _, ok := g.a[x]; ok == false {
+		return nil, errors.New("node X doesn't exists")
+	}
+
+	return x.v, nil
+}
+
+//SetNodeValue Set value of a node (alias a := Node{0.4})
+func (g *AdjacencyList) SetNodeValue(x *Node, v interface{}) error {
+	g.lazyInit()
+
+	if _, ok := g.a[x]; ok == false {
+		return errors.New("node X doesn't exists")
+	}
+	x.v = v
+	return nil
+}
+
+//GetEdgeValue Gets an edge value, if exists.
+func (g *AdjacencyList) GetEdgeValue(x, y *Node) (interface{}, error) {
+	g.lazyInit()
+
+	if _, ok := g.a[x]; ok == false {
+		return nil, errors.New("node X doesn't exists")
+	}
+	if _, ok := g.a[y]; ok == false {
+		return nil, errors.New("node Y doesn't exists")
+	}
+
+	v, ok := g.a[x][y]
+	if ok == false {
+		return nil, errors.New("edge does not exists")
+	}
+
+	return v, nil
+}
+
+//SetEdgeValue Create or updates an edge value
+func (g *AdjacencyList) SetEdgeValue(x, y *Node, v interface{}) error {
+	g.lazyInit()
+
+	if _, ok := g.a[x]; ok == false {
+		return errors.New("node X doesn't exists")
+	}
+	if _, ok := g.a[y]; ok == false {
+		return errors.New("node Y doesn't exists")
+	}
+
+	g.a[x][y] = v
+	g.a[y][x] = v
+	return nil
+}
+
+//Neighbours ...
+func (g *AdjacencyList) Neighbours(x *Node) ([]*Node, error) {
+	g.lazyInit()
+
+	if _, ok := g.a[x]; ok == false {
+		return nil, errors.New("node X doesn't exists")
+	}
+
+	r := make([]*Node, len(g.a[x]))
+	i := 0
+	for n := range g.a[x] {
+		r[i] = n
+		i++
+	}
+	return r, nil
 }
