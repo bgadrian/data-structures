@@ -1,4 +1,4 @@
-/*Package graph ...*/
+/*Package graph contains a series of simple graph data structures, used for academic purposes.*/
 package graph
 
 //Node represent a vertex
@@ -6,8 +6,8 @@ type Node struct {
 	v interface{} //object stored
 }
 
-//Graph ...
-type Graph interface {
+//Undirected Common interface for all graph implementations
+type Undirected interface {
 	Adjacent(x, y *Node) (bool, error)            // tests whether there is an edge from the vertex x to the vertex y;
 	Neighbours(x *Node) ([]*Node, error)          //: lists all vertices y such that there is an edge from the vertex x to the vertex y;
 	AddNode(x ...*Node)                           //: adds the vertex x, if it is not there;
@@ -18,4 +18,12 @@ type Graph interface {
 	SetNodeValue(x *Node, v interface{}) error    //: sets the value associated with the vertex x to v.
 	GetEdgeValue(x, y *Node) (interface{}, error) //: returns the value associated with the edge (x, y);
 	SetEdgeValue(x, y *Node, v interface{}) error //: sets the value associated with the edge (x, y) to v.
+}
+
+//Directed Common interface for all directed graph implementations
+type Directed interface {
+	Undirected
+	AddDirectedEdge(x, y *Node) error
+	RemoveDirectedEdge(x, y *Node) error
+	SetDirectedEdgeValue(x, y *Node, v interface{}) error
 }

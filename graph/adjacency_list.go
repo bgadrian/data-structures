@@ -43,6 +43,7 @@ func (g *AdjacencyList) RemoveNode(x ...*Node) {
 }
 
 //AddEdge Add a vertice between 2 nodes.
+//if is a directed graph adds 2 edges (x->y and x<-y)
 func (g *AdjacencyList) AddEdge(x, y *Node) error {
 	g.lazyInit()
 
@@ -59,6 +60,7 @@ func (g *AdjacencyList) AddEdge(x, y *Node) error {
 }
 
 //RemoveEdge Remove a vertice between two nodes
+//if is a directed graph removes 2 edges (x->y and x<-y)
 func (g *AdjacencyList) RemoveEdge(x, y *Node) error {
 	g.lazyInit()
 
@@ -138,7 +140,7 @@ func (g *AdjacencyList) GetEdgeValue(x, y *Node) (interface{}, error) {
 	return v, nil
 }
 
-//SetEdgeValue Create or updates an edge value
+//SetEdgeValue Create or updates a vertice's value
 func (g *AdjacencyList) SetEdgeValue(x, y *Node, v interface{}) error {
 	g.lazyInit()
 

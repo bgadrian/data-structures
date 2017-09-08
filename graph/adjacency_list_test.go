@@ -77,6 +77,10 @@ func TestALRemoveEdge(t *testing.T) {
 		t.Error("edge adjacent didn't worked ")
 	}
 
+	if ok, _ := g.Adjacent(b, a); ok == false {
+		t.Error("edge adjacent didn't worked ")
+	}
+
 	g.RemoveEdge(a, b)
 	if ok, _ := g.Adjacent(a, b); ok == true {
 		t.Error("edge remove didn't worked")
@@ -214,7 +218,7 @@ func TestALNotExistent(t *testing.T) {
 
 func TestALInterface(t *testing.T) {
 
-	x := func(g Graph) {
+	x := func(g Undirected) {
 
 	}
 	x(&AdjacencyList{})
