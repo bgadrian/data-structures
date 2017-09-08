@@ -33,6 +33,10 @@ Insert (push) and remove min/max (pop) have ```O(log n)``` complexity. The keys 
 A collection of simple graph data structures, used for **academic purposes**.
 ### AdjacencyList [description](https://en.wikipedia.org/wiki/Adjacency_list)
 AdjacencyList is a collection of unordered lists used to represent a finite graph. The graph is undirected with values on nodes and edges.
+A collection of simple graph data structures, used for **academic purposes**.
+
+### AdjacencyListDirected 
+It is a AdjacencyList with 3 extra functions, that allow 1 direction edge control.
 
 ## [linear](linear/README.md) [![GoDoc](https://godoc.org/golang.org/x/tools/cmd/godoc?status.svg)](https://godoc.org/github.com/BTooLs/data-structures/linear)
 A collection of simple linear data structres, that are not in the standard Go lib, built for academic purposes.
