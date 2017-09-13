@@ -1,4 +1,4 @@
-# Data structures in Go [![Build Status](https://travis-ci.org/bgadrian/basic-data-and-algorithms.svg?branch=master)](https://travis-ci.org/bgadrian/basic-data-and-algorithms) [![codecov](https://codecov.io/gh/bgadrian/basic-data-and-algorithms/branch/master/graph/badge.svg)](https://codecov.io/gh/bgadrian/basic-data-and-algorithms) [![Go Report Card](https://goreportcard.com/badge/github.com/bgadrian/basic-data-and-algorithms)](https://goreportcard.com/report/github.com/bgadrian/basic-data-and-algorithms)
+# Data structures in Go [![Build Status](https://travis-ci.org/bgadrian/data-structures.svg?branch=master)](https://travis-ci.org/bgadrian/data-structures) [![codecov](https://codecov.io/gh/bgadrian/data-structures/branch/master/graph/badge.svg)](https://codecov.io/gh/bgadrian/data-structures) [![Go Report Card](https://goreportcard.com/badge/github.com/bgadrian/data-structures)](https://goreportcard.com/report/github.com/bgadrian/data-structures)
 I am writing a collection of packages for different data structures in GO.
 
 Why? To learn Go, practice basic structures and learning to code fast concurrent algorithms.
