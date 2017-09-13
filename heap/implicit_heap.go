@@ -10,7 +10,7 @@ It can store a series of objects (of any type) associated with a key (priority).
 Use ImplicitHeapMin to always get the smallest key (priority)
 and ImplicitHeapMax for the largest key.
 
-For best perfomance use a small non sparsed Key value distribution. (100-300 incremental values).
+For best performance use a small non sparsed Key value distribution. (100-300 incremental values).
 */
 type ImplicitHeap interface {
 	Push(priority int, v interface{})
@@ -21,6 +21,7 @@ type ImplicitHeap interface {
 	Unlock()
 	IsDepleted() bool
 	HasElement() bool
+	Len() int
 }
 
 //inheritance bypass, the overloading didn't worked :(

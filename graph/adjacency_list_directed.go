@@ -22,7 +22,6 @@ func (g *AdjacencyListDirected) AddDirectedEdge(x, y *Node) error {
 	return nil
 }
 
-
 //RemoveDirectedEdge Remove the x->y vertice, if exists.
 func (g *AdjacencyList) RemoveDirectedEdge(x, y *Node) error {
 	g.lazyInit()
@@ -39,8 +38,7 @@ func (g *AdjacencyList) RemoveDirectedEdge(x, y *Node) error {
 	return nil
 }
 
-
-//SetDirectedEdgeValue ... 
+//SetDirectedEdgeValue ...
 func (g *AdjacencyList) SetDirectedEdgeValue(x, y *Node, v interface{}) error {
 	g.lazyInit()
 

@@ -2,7 +2,7 @@ package priorityqueue
 
 import "sync"
 
-import "github.com/BTooLs/data-structures/heap"
+import "github.com/bgadrian/data-structures/heap"
 import "errors"
 
 /*HierarchicalHeap It is a modification of the Hierarchical Queue structure, adding some complexity (O(log n/k)) but removing it's limitations.

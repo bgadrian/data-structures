@@ -14,7 +14,7 @@ type ImplicitHeapMin struct {
 	sync.Mutex
 }
 
-//shouldGoUp We keep the min comparasion formula in 1 place
+//shouldGoUp We keep the min comparison formula in 1 place
 //it is overwritten for Max
 func minShouldGoUp(p, c implicitHeapNode) bool {
 	return c.priority < p.priority

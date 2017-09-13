@@ -15,4 +15,4 @@ Insert (push) and remove min/max (pop) have ```O(log n)``` complexity. The size 
 
 The keys are ```int```and values can be any type ```interface{}```.
 
-**For best perfomance use a small non sparsed Key value distribution. (100-300 incremental values).** 
+**For best performance use a small non sparsed Key value distribution. (100-300 incremental values).** 

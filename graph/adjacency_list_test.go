@@ -164,7 +164,7 @@ func TestALEdgeValue(t *testing.T) {
 		t.Error(err)
 	}
 
-	v, err = g.GetEdgeValue(b, c)
+	_, err = g.GetEdgeValue(b, c)
 
 	if err == nil {
 		t.Error("GetEdgeValue didn't returned error on missing edge")

@@ -115,6 +115,10 @@ func testIHConcurrentSpam(h ImplicitHeap, autoLock bool, t *testing.T) {
 		group.Add(1)
 		go func() {
 			for times := 0; times < 150; times++ {
+				if h.Len() == 0 {
+					time.Sleep(1 * time.Millisecond)
+				}
+
 				if autoLock == false {
 					h.Lock()
 				}

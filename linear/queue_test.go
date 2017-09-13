@@ -239,7 +239,7 @@ func BenchmarkQueueSync1000(b *testing.B) {
 }
 
 func BenchmarkQueueSync100000(b *testing.B) {
-	benchQueueSync(100000,b)
+	benchQueueSync(100000, b)
 }
 
 func BenchmarkQueueSync1000000(b *testing.B) {

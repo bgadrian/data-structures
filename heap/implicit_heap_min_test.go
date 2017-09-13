@@ -37,7 +37,7 @@ func TestIHMinBasic(t *testing.T) {
 	v, ok = h.Pop()
 	quickAssertBool(false, ok, "pop empty was ok", t)
 
-	v, ok = h.Peek()
+	_, ok = h.Peek()
 	quickAssertBool(false, ok, "peek empty was ok", t)
 
 	quickAssertBool(true, h.IsDepleted(), "was empty but depleted says false", t)
@@ -115,7 +115,7 @@ func TestIHMinCapacity(t *testing.T) {
 	quickAssert(26, h.n, "count is 26", t)
 
 	popIHNodes(h, 19, t)
-	quickAssert(16, cap(h.a), "capacity shrinked /2", t)
+	quickAssert(16, cap(h.a), "capacity shrunk /2", t)
 
 	popIHNodes(h, int(h.n), t)
 	quickAssert(8, cap(h.a), "capacity never drop 8", t)

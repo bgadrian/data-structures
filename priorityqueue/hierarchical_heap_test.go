@@ -179,23 +179,31 @@ func testHHLocks(autoLock bool, t *testing.T) {
 
 	var group sync.WaitGroup
 
+	lock := func() {
+		if autoLock == false {
+			megaHH.Lock()
+		}
+	}
+
+	unlock := func() {
+		if autoLock == false {
+			megaHH.Unlock()
+		}
+	}
+
 	//spam enqueue
 	for i := 0; i <= 100; i++ {
 		group.Add(1)
 		go func() {
 			for times := 0; times < 20; times++ {
-				if autoLock == false {
-					megaHH.Lock()
-				}
+				lock()
 
 				megaHH.Enqueue("a", times%lowestP)
 
 				if err != nil {
 					t.Error(err)
 				}
-				if autoLock == false {
-					megaHH.Unlock()
-				}
+				unlock()
 				time.Sleep(time.Millisecond * 10)
 			}
 			group.Done()
@@ -210,19 +218,14 @@ func testHHLocks(autoLock bool, t *testing.T) {
 			time.Sleep(time.Millisecond * 30)
 
 			for times := 0; times < 20; times++ {
-				if autoLock == false {
-					megaHH.Lock()
-				}
-
+				lock()
 				_, err := megaHH.Dequeue()
 
 				if err != nil {
 					t.Error(err)
 				}
 
-				if autoLock == false {
-					megaHH.Unlock()
-				}
+				unlock()
 				time.Sleep(time.Millisecond * 10)
 			}
 
@@ -238,15 +241,10 @@ func testHHLocks(autoLock bool, t *testing.T) {
 			time.Sleep(time.Millisecond * 30)
 
 			for times := 0; times < 10; times++ {
-				if autoLock == false {
-					megaHH.Lock()
-				}
-
+				lock()
 				megaHH.Len()
 
-				if autoLock == false {
-					megaHH.Unlock()
-				}
+				unlock()
 				time.Sleep(time.Millisecond * 20)
 			}
 
