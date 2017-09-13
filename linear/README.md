@@ -1,4 +1,4 @@
-## linear [![GoDoc](https://godoc.org/golang.org/x/tools/cmd/godoc?status.svg)](https://godoc.org/github.com/BTooLs/data-structures/linear)
+## linear [![GoDoc](https://godoc.org/golang.org/x/tools/cmd/godoc?status.svg)](https://godoc.org/github.com/bgadrian/data-structures/linear)
 A collection of simple linear data structres, that are not in the standard Go lib.
 
 ### Stack [description](https://www.tutorialspoint.com/data_structures_algorithms/stack_algorithm.htm)

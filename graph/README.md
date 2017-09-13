@@ -1,4 +1,4 @@
-## graph [![GoDoc](https://godoc.org/golang.org/x/tools/cmd/godoc?status.svg)](https://godoc.org/github.com/BTooLs/data-structures/graph)
+## graph [![GoDoc](https://godoc.org/golang.org/x/tools/cmd/godoc?status.svg)](https://godoc.org/github.com/bgadrian/data-structures/graph)
 A collection of simple graph data structures, used for **academic purposes**. More info on [wiki](https://en.wikipedia.org/wiki/Graph_(abstract_data_type)) or [visual example](https://www.tutorialspoint.com/data_structures_algorithms/graph_data_structure.htm)
 
 Nodes and edges can have values, so **weighted** graphs can be built using the same data structures.
