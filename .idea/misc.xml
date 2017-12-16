@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="GoImports">
+    <option name="groupStdlibImports" value="true" />
+    <option name="importSorting" value="GOFMT" />
+    <option name="moveAllStdlibImportsInOneGroup" value="true" />
+    <option name="showImportPopup" value="false" />
+  </component>
+</project>
