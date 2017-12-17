@@ -52,3 +52,7 @@ Basic stack (FILO) using the builtin linked list, can store any type, concurrenc
 
 ### Queue [description](https://www.tutorialspoint.com/data_structures_algorithms/dsa_queue.htm) 
 Basic queue (FIFO) using the builtin linked list, can store any type, concurrency safe (optional mutex), no size limit, implements Stringer.
+
+
+## [Multi-Pivot QuickSort](sort/multipivotquicksort/README.md) [![GoDoc](https://godoc.org/golang.org/x/tools/cmd/godoc?status.svg)](https://godoc.org/github.com/bgadrian/data-structures/sort/multipivotquicksort)
+ MultiPivot uses a variant of the QuickSort algorithm with multiple pivots, splitting the arrays in multiple segments (pivots+1). It can be used to sort large arrays.

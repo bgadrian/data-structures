@@ -1,4 +1,11 @@
 /*Package multipivotquicksort
+MultiPivot uses a variant of the QuickSort with multiple pivots, splitting the arrays in multiple segments (pivots+1).
+
+Dual-pivot quick search is used in Java7 default sorting method. This algorithm is NOT the sme with the multi-way quicksort.
+The current implementation works only with int slices, but can be easily modified to compare your own data structures, but be careful at the memory usage.
+
+The package was built for academic purposes, to learn more about newest research made see the following papers:
+
 http://epubs.siam.org/doi/pdf/10.1137/1.9781611973198.6
 https://web.archive.org/web/20151002230717/http://iaroslavski.narod.ru/quicksort/DualPivotQuicksort.pdf
 http://cs.stanford.edu/~rishig/courses/ref/l11a.pdf
@@ -25,13 +32,15 @@ package multipivotquicksort
 import (
 	"fmt"
 	"sort"
+	"sync"
 )
 
-func swap(A []int, a, b int) {
-	A[a], A[b] = A[b], A[a]
-}
-
-func FivePivot(list []int, pivotCount uint8) (result []int, err error) {
+/*MultiPivot uses a variant of the QuickSort with multiple pivots, splitting the arrays in multiple segments (pivots+1).
+It consumes more space (memory), is not yet optimized to work with only 1 slice, it copies the data in each step.
+singleThread should be used for small data sets, benchmark with your own data sets to see which is best.
+pivotCount 1 has the same effect as the regular quickSort, with larger data sets (millions) more then 7 pivots can improve the algorithm.
+.*/
+func MultiPivot(list []int, pivotCount uint8, singleThread bool) (result []int, err error) {
 	defer func() {
 		r := recover()
 		if r != nil {
@@ -60,31 +69,47 @@ func FivePivot(list []int, pivotCount uint8) (result []int, err error) {
 
 	list = list[pivotCount:]
 	segments := make([][]int, pivotCount+1)
-	found := false
 
 	for _, el := range list {
-		found = false
 		for pindex, pvalue := range pivots {
 			if el < pvalue {
-				found = true
 				segments[pindex] = append(segments[pindex], el)
-				break
+				goto found
 			}
 		}
-		if found == false {
-			segments[pivotCount] = append(segments[pivotCount], el)
-		}
+		//the element is >= last pivot, so it goes to the last bucket/segment
+		segments[pivotCount] = append(segments[pivotCount], el)
+	found:
 	}
 
-	var sortedSegment []int
+	//apply the same alg to each segment/bucket
+	sortedSegments := make([][]int, len(segments))
+	if singleThread {
+		for sindex, segment := range segments {
+			sortedSegments[sindex], err = MultiPivot(segment, pivotCount, singleThread)
+			if err != nil {
+				return
+			}
+		}
+	} else {
+		var wg sync.WaitGroup
+		wg.Add(len(segments))
+		//goroutines share memory, has a race problem
+		//but each one has its own index
+		for sindex, segment := range segments {
+			go func(sindex int, segment []int) {
+				sortedSegments[sindex], err = MultiPivot(segment, pivotCount, singleThread)
+				wg.Done()
+			}(sindex, segment)
+		}
+
+		wg.Wait()
+	}
+
+	//glue the segments in the result
 	result = make([]int, n) //preallocate
 	i := 0
-
-	for sindex, segment := range segments {
-		sortedSegment, err = FivePivot(segment, pivotCount)
-		if err != nil {
-			return
-		}
+	for sindex, sortedSegment := range sortedSegments {
 		i += copy(result[i:], sortedSegment)
 		if sindex < len(pivots) {
 			result[i] = pivots[sindex]

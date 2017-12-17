@@ -6,18 +6,9 @@ import (
 	"testing"
 )
 
-func TestSwap(t *testing.T) {
-	a := []int{3, 2, 1}
-	swap(a, 0, 2)
-	if a[0] != 1 && a[2] != 3 {
-		t.Errorf("swap failed %v",
-			a)
-	}
-}
-
-func TestFivePivot(t *testing.T) {
+func TestOnePivot(t *testing.T) {
 	a := []int{5, 3, 4, 7, 1, 9, 3, 4, 9, 1, 4, 7}
-	res, err := FivePivot(a, 1)
+	res, err := MultiPivot(a, 1, true)
 	if err != nil {
 		t.Error(err)
 	}
@@ -26,7 +17,28 @@ func TestFivePivot(t *testing.T) {
 	}
 }
 
-func TestFivePivotRandom(t *testing.T) {
+func Test3Pivot(t *testing.T) {
+	a := []int{5, 3, 4, 7, 1, 9, 3, 4, 9, 1, 4, 7}
+	res, err := MultiPivot(a, 3, true)
+	if err != nil {
+		t.Error(err)
+	}
+	if isOrdered(res) == false {
+		t.Errorf("%v is not ordered", a)
+	}
+}
+func Test3PivotAsync(t *testing.T) {
+	a := []int{5, 3, 4, 7, 1, 9, 3, 4, 9, 1, 4, 7}
+	res, err := MultiPivot(a, 3, false)
+	if err != nil {
+		t.Error(err)
+	}
+	if isOrdered(res) == false {
+		t.Errorf("%v is not ordered", a)
+	}
+}
+
+func TestMultiPivotTable(t *testing.T) {
 	type one struct {
 		seed   int64
 		max    int
@@ -57,7 +69,7 @@ func TestFivePivotRandom(t *testing.T) {
 		}()
 
 		orig := generator(test.seed, test.max, test.count)
-		res, err := FivePivot(orig, test.pivots)
+		res, err := MultiPivot(orig, test.pivots, true)
 		if err != nil {
 			t.Error(err)
 		}
@@ -83,6 +95,7 @@ func isOrdered(arr []int) bool {
 	return true
 }
 
+//generator predictable array generator
 func generator(seed int64, max, count int) (res []int) {
 	res = make([]int, count)
 	rand.Seed(seed)
@@ -90,4 +103,59 @@ func generator(seed int64, max, count int) (res []int) {
 		res[i] = rand.Intn(max)
 	}
 	return
+}
+
+func BenchmarkFivePivot5P300000L(b *testing.B) {
+	orig := generator(2, 10000, 300000)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		arr := make([]int, len(orig))
+		copy(arr, orig)
+		MultiPivot(arr, 5, true)
+	}
+}
+
+func BenchmarkFivePivotAsync2P300000L(b *testing.B) {
+	orig := generator(2, 10000, 300000)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		arr := make([]int, len(orig))
+		copy(arr, orig)
+		MultiPivot(arr, 2, false)
+	}
+}
+
+func BenchmarkFivePivotAsync5P300000L(b *testing.B) {
+	orig := generator(2, 10000, 300000)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		arr := make([]int, len(orig))
+		copy(arr, orig)
+		MultiPivot(arr, 5, false)
+	}
+}
+
+func BenchmarkFivePivotAsync7P300000L(b *testing.B) {
+	orig := generator(2, 10000, 300000)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		arr := make([]int, len(orig))
+		copy(arr, orig)
+		MultiPivot(arr, 7, false)
+	}
+}
+
+func ExampleMultiPivot() {
+	a := []int{5, 3, 4, 7, 1, 9, 3, 4, 9, 1, 4, 7}
+	var pivotCount uint8 = 3
+	singleThread := false
+	res, err := MultiPivot(a, pivotCount, singleThread)
+	if err != nil {
+		fmt.Errorf("%v", err)
+		return
+	}
+
+	fmt.Printf("Result is\n%v", res)
+	//Output: Result is
+	//[1 1 3 3 4 4 4 5 7 7 9 9]
 }
