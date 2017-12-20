@@ -1,2 +1,2 @@
-/*Package tree ...package tree */
+/*Package tree contains simple Tree implementations for academic purposes.*/
 package tree
