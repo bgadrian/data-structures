@@ -10,7 +10,7 @@ All the packages have 100+% test coverage, benchmark tests and godocs. Tested wi
 ## [priorityqueue](priorityqueue/README.md)  [![GoDoc](https://godoc.org/golang.org/x/tools/cmd/godoc?status.svg)](https://godoc.org/github.com/bgadrian/data-structures/priorityqueue)
 A collection of performant, concurrent safe, complex abstract data structures used for priority queues.
 
-*Priority queue is an abstract data type which is like a regular queue or stack data structure, but where additionally each element has a "priority" associated with it. In a priority queue, an element with high priority is served before an element with low priority.*
+*Priority queue is an [abstract data type](https://www.scaler.com/topics/abstract-data-type-in-data-structure/) which is like a regular queue or stack data structure, but where additionally each element has a "priority" associated with it. In a priority queue, an element with high priority is served before an element with low priority.*
 
 ### [Hierarchical Queue](priorityqueue/README.md) [description](https://www.researchgate.net/figure/261191274_fig1_Figure-1-Simple-queue-a-and-hierarchical-queue-b) 
 An **O(1)/O(1+K) priority queue (very fast)** implementation for small integers, that uses an assembly of N simple queues. It is optimized for large amount of data BUT with small value priorities ( **<= 255** ). Can store any type of elements/values.
